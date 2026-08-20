@@ -2,6 +2,7 @@
 // Swapping to a different candidate/role/company is a data-only change.
 
 import topEmployerSeal from '../assets/images/top-employer-seal.png';
+import linkedinTopCompaniesSeal from '../assets/images/linkedin-top-companies-seal.png';
 
 export const candidate = {
   name: 'Raquel',
@@ -36,8 +37,10 @@ export const screens = {
   topEmployer: {
     eyebrow: 'CNS TRAINING INSTRUCTOR',
     headline: 'Reconocidos como Top Employer y LinkedIn Top Companies 2026',
-    badgeImg: topEmployerSeal,
-    badgeAlt: 'Sello Top Employer España 2026',
+    badges: [
+      { src: topEmployerSeal, alt: 'Sello Top Employer España 2026' },
+      { src: linkedinTopCompaniesSeal, alt: 'Sello LinkedIn Top Companies España 2026' },
+    ],
     body: 'Reflejan nuestro compromiso con las personas: desarrollo, aprendizaje y oportunidades a largo plazo.',
     cta: '¿Construimos juntos el futuro?',
     tagline: 'Together, One Mission.',

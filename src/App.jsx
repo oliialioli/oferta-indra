@@ -25,10 +25,11 @@ export default function App() {
     () => Math.round((activeIndex / (SCREEN_COUNT - 1)) * 100),
     [activeIndex]
   );
+  const sectionLabel = `${activeIndex + 1} de ${SCREEN_COUNT}`;
 
   return (
     <>
-      <Header roleLabel={screens.intro.eyebrow} progressPct={progressPct} />
+      <Header roleLabel={screens.intro.eyebrow} sectionLabel={sectionLabel} progressPct={progressPct} />
 
       <Box sx={{ position: 'relative' }}>
         <AvatarNarrator
@@ -45,6 +46,7 @@ export default function App() {
             paddingLeft: { xs: 0, md: 'clamp(8px, 1.2vw, 24px)' },
             paddingRight: 'clamp(20px, 2.11vw, 40px)',
             paddingTop: 0,
+            paddingBottom: { xs: '96px', md: 0 },
           }}
         >
           {/* Screen 1 — Intro */}
@@ -53,6 +55,7 @@ export default function App() {
             revealed={revealed.has(0)}
             eyebrow={screens.intro.eyebrow}
             headline={screens.intro.headline}
+            headlineVariant="hero"
             body={screens.intro.body}
             tagline={screens.intro.tagline}
           >
@@ -108,8 +111,7 @@ export default function App() {
             eyebrow={screens.topEmployer.eyebrow}
             headline={screens.topEmployer.headline}
             body={screens.topEmployer.body}
-            badge={screens.topEmployer.badgeImg}
-            badgeAlt={screens.topEmployer.badgeAlt}
+            badges={screens.topEmployer.badges}
             tagline={screens.topEmployer.tagline}
             taglinePosition="after-children"
           >
@@ -143,7 +145,12 @@ export default function App() {
         </Box>
       </Box>
 
-      <StickyCta onAccept={() => setModalOpen(true)} />
+      <StickyCta
+        onAccept={() => setModalOpen(true)}
+        activeIndex={activeIndex}
+        screenCount={SCREEN_COUNT}
+        onNext={scrollToNext}
+      />
 
       <AcceptModal
         open={modalOpen}

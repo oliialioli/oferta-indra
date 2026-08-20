@@ -7,6 +7,10 @@ export const colors = {
   blanco: '#ffffff',
 };
 
+// Height of the fixed mobile header — shared with components (AvatarNarrator's
+// compact sticky bar, StickyCta) that need to position themselves relative to it.
+export const HEADER_HEIGHT_MOBILE = 60;
+
 const theme = createTheme({
   breakpoints: {
     // 760px is the structural breakpoint in the original design: below it,

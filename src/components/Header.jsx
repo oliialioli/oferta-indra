@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { colors } from '../theme/theme';
+import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
 import indraLogo from '../assets/images/indra-logo.svg';
 
-export default function Header({ roleLabel, progressPct }) {
+export default function Header({ roleLabel, sectionLabel, progressPct }) {
   return (
     <Box
       component="header"
@@ -18,7 +18,12 @@ export default function Header({ roleLabel, progressPct }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: { xs: '12px 20px', md: '24px clamp(20px, 2.11vw, 40px)' },
+        boxSizing: 'border-box',
+        minHeight: { xs: HEADER_HEIGHT_MOBILE, md: 'auto' },
+        paddingTop: { xs: 'max(16px, env(safe-area-inset-top))', md: '24px' },
+        paddingBottom: { xs: '16px', md: '24px' },
+        paddingLeft: { xs: '20px', md: 'clamp(20px, 2.11vw, 40px)' },
+        paddingRight: { xs: '20px', md: 'clamp(20px, 2.11vw, 40px)' },
       }}
     >
       <Box
@@ -30,9 +35,14 @@ export default function Header({ roleLabel, progressPct }) {
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, md: '22px' } }}>
         <Typography
-          sx={{ fontSize: 12, color: colors.grisAcero, whiteSpace: 'nowrap' }}
+          sx={{ display: { xs: 'none', md: 'block' }, fontSize: 12, color: colors.grisAcero, whiteSpace: 'nowrap' }}
         >
           {roleLabel}
+        </Typography>
+        <Typography
+          sx={{ display: { xs: 'block', md: 'none' }, fontSize: 12, color: colors.grisAcero, whiteSpace: 'nowrap' }}
+        >
+          {sectionLabel}
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '11px' }}>

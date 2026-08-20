@@ -9,7 +9,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import CheckIcon from '@mui/icons-material/Check';
 import OfferButton from './OfferButton';
-import { colors } from '../theme/theme';
+import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
 import { useNarrator } from '../hooks/useNarrator';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { NARRATOR_VIDEOS, LOOPING_STATES } from '../data/narratorVideos';
@@ -19,6 +19,11 @@ const CROSSFADE_MS = 220;
 const LAYER_REF_KEYS = ['A', 'B'];
 const PENDING_WORD_COLOR = 'rgba(148, 163, 184, 0.55)';
 const CYAN = '#22D3EE';
+// Sampled directly from the character clips' own background — a hair off
+// colors.azulOscuro (#002532), close enough to pass unnoticed most of the
+// time but not exactly matching, which is what made the frame's edge
+// readable as a rectangle against the page.
+const VIDEO_BG = '#002333';
 
 // The four open corner brackets framing the character — an Indra brand
 // mark (the same chamfered-corner language as OfferButton's hover state),
@@ -29,7 +34,7 @@ function CornerFrame() {
       component="svg"
       viewBox="0 0 24 24"
       fill="none"
-      sx={{ position: 'absolute', width: 36, height: 36, top: '3%', left: '3%' }}
+      sx={{ position: 'absolute', width: 36, height: 36, top: 0, left: 0 }}
     >
       <path
         d="M1 22V6L6 1H22"
@@ -47,7 +52,7 @@ function CornerFrame() {
       sx={{
         position: 'absolute',
         inset: 0,
-        display: { xs: 'none', md: 'block' },
+        display: 'block',
         pointerEvents: 'none',
       }}
     >
@@ -182,7 +187,13 @@ function TranscriptHighlight({ text, audioRef, active, ended, revealSeq }) {
   }, [active, ended, words, audioRef, paint, revealSeq]);
 
   return (
-    <Typography sx={{ fontSize: 14, lineHeight: 1.6, margin: 0 }}>
+    <Typography
+      sx={{
+        fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 14 },
+        lineHeight: { xs: 1.5, md: 1.6 },
+        margin: 0,
+      }}
+    >
       {words.map((word, i) => (
         <Box
           key={i}
@@ -227,6 +238,22 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
   } = narrator;
 
   const reducedMotion = usePrefersReducedMotion();
+
+  // Mobile only: once the large welcome character scrolls out of view, hand
+  // off to a compact sticky bar below the header — never both at once, and
+  // never before audio has actually been turned on.
+  const bigBlockRef = useRef(null);
+  const [compactVisible, setCompactVisible] = useState(false);
+  useEffect(() => {
+    const el = bigBlockRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setCompactVisible(!entry.isIntersecting),
+      { rootMargin: `-${HEADER_HEIGHT_MOBILE}px 0px 0px 0px`, threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const videoRefs = { A: useRef(null), B: useRef(null) };
   const frontRef = useRef('A');
@@ -371,12 +398,12 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
     <Box
       sx={{
         position: 'relative',
-        width: { xs: 52, md: 'clamp(140px, 19.4vw, 368px)' },
-        aspectRatio: { xs: '1 / 1', md: '368 / 484' },
+        width: { xs: 'clamp(180px, 50vw, 210px)', md: 'clamp(140px, 19.4vw, 368px)' },
+        aspectRatio: '368 / 484',
         flex: 'none',
       }}
     >
-      <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', background: colors.azulOscuro }}>
+      <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', background: VIDEO_BG }}>
         {videoFailed || reducedMotion ? (
           <Box
             component="img"
@@ -410,6 +437,19 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
             />
           ))
         )}
+
+        {/* Soft vignette feathering the video's edge into the page's own
+            background, so the frame reads as "the character lives here"
+            rather than a pasted-in rectangle. */}
+        <Box
+          aria-hidden="true"
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            background: `radial-gradient(ellipse at center, transparent 72%, ${colors.azulOscuro} 100%)`,
+          }}
+        />
 
         <CornerFrame />
       </Box>
@@ -483,41 +523,117 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
     </Box>
   );
 
+  const showCompactBar = compactVisible && audioEnabled;
+  const compactLabel =
+    audioPhase === 'playing'
+      ? 'Hablando…'
+      : audioPhase === 'paused'
+        ? 'Audio pausado'
+        : audioPhase === 'ended'
+          ? 'Audio finalizado'
+          : audioPhase === 'error'
+            ? 'Error de audio'
+            : '';
+
   return (
     <>
+      {/* One narrator block, ONE set of video/audio elements: on desktop it's
+          a fixed left column; on mobile it sits in normal document flow at
+          the top of the page (large, centered, non-sticky) and simply
+          scrolls away with the rest of the welcome content. */}
       <Box
+        ref={bigBlockRef}
         component="aside"
         aria-label={`${avatarName}, asistente virtual de Indra Group`}
         sx={{
-          position: { xs: 'sticky', md: 'fixed' },
-          // 42px clears the fixed mobile Header (logo height + padding) so
-          // the two bars don't stack on top of each other.
-          top: { xs: '42px', md: 0 },
-          marginTop: { xs: '42px', md: 0 },
+          position: { xs: 'static', md: 'fixed' },
+          top: { md: 0 },
           left: 0,
           width: { xs: '100%', md: 'clamp(240px, 47vw, 900px)' },
           height: { xs: 'auto', md: '100vh' },
           display: 'flex',
-          flexDirection: { xs: 'row', md: 'column' },
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: { xs: 'flex-start', md: 'center' },
-          gap: { xs: '14px', md: '24px' },
-          padding: { xs: '10px 20px', md: 0 },
-          background: { xs: 'rgba(0,37,50,0.6)', md: 'transparent' },
-          backdropFilter: { xs: 'blur(10px)', md: 'none' },
-          borderBottom: { xs: '1px solid rgba(255,255,255,0.08)', md: 'none' },
+          gap: { xs: '16px', md: '24px' },
+          marginTop: { xs: `${HEADER_HEIGHT_MOBILE + 12}px`, md: 0 },
+          padding: { xs: '0 20px 20px', md: 0 },
+          background: 'transparent',
           zIndex: 70,
         }}
       >
         {characterBox}
 
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, width: 'clamp(140px, 19.4vw, 368px)' }}>{narratorBlock}</Box>
+        <Box sx={{ width: { xs: '100%', md: 'clamp(140px, 19.4vw, 368px)' } }}>{narratorBlock}</Box>
       </Box>
 
-      {/* Mobile: the transcript+controls sit in normal flow right below the
-          compact sticky bar above, scrolling away with the rest of the page —
-          directly on the page background, no card. */}
-      <Box sx={{ display: { xs: 'block', md: 'none' }, padding: '4px 20px 16px' }}>{narratorBlock}</Box>
+      {/* Mobile only: compact sticky bar, shown once the large character has
+          scrolled out of view — never before audio has been activated, never
+          together with the large character above. */}
+      <Box
+        aria-hidden={!showCompactBar}
+        sx={{
+          display: { xs: 'flex', md: 'none' },
+          position: 'sticky',
+          top: HEADER_HEIGHT_MOBILE,
+          zIndex: 75,
+          alignItems: 'center',
+          gap: '10px',
+          boxSizing: 'border-box',
+          height: showCompactBar ? 60 : 0,
+          opacity: showCompactBar ? 1 : 0,
+          overflow: 'hidden',
+          padding: showCompactBar ? '0 20px' : '0 20px',
+          pointerEvents: showCompactBar ? 'auto' : 'none',
+          background: 'rgba(0,25,34,0.92)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          transition: reducedMotion ? 'none' : 'height .25s ease, opacity .2s ease',
+        }}
+      >
+        {showCompactBar && (
+          <>
+            <Box
+              component="img"
+              src={avatarPoster}
+              alt=""
+              aria-hidden="true"
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '50%',
+                objectFit: 'cover',
+                flex: 'none',
+                border: '1px solid rgba(255,255,255,0.2)',
+              }}
+            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+              <MiniWave animate={audioPhase === 'playing' && !reducedMotion} />
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  color: colors.blanco,
+                  margin: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {compactLabel}
+              </Typography>
+            </Box>
+            {primary && (
+              <IconButton
+                onClick={primary.onClick}
+                aria-label={primary.label}
+                sx={{ color: colors.blanco, border: '1px solid rgba(255,255,255,0.3)', borderRadius: 0, width: 40, height: 40, flex: 'none' }}
+              >
+                {primary.icon}
+              </IconButton>
+            )}
+          </>
+        )}
+      </Box>
 
       <Box component="audio" ref={audioRef} preload="none" sx={{ display: 'none' }} />
     </>
