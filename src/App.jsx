@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Header from './components/Header';
-import AvatarPanel from './components/AvatarPanel';
+import AvatarNarrator from './components/AvatarNarrator';
 import Screen from './components/Screen';
 import OfferButton from './components/OfferButton';
 import StatGrid from './components/StatGrid';
@@ -31,7 +31,11 @@ export default function App() {
       <Header roleLabel={screens.intro.eyebrow} progressPct={progressPct} />
 
       <Box sx={{ position: 'relative' }}>
-        <AvatarPanel avatarName={candidate.avatarName} />
+        <AvatarNarrator
+          avatarName={candidate.avatarName}
+          activeIndex={activeIndex}
+          modalOpen={modalOpen}
+        />
 
         <Box
           component="main"
@@ -40,7 +44,7 @@ export default function App() {
             maxWidth: 775,
             paddingLeft: { xs: 0, md: 'clamp(8px, 1.2vw, 24px)' },
             paddingRight: 'clamp(20px, 2.11vw, 40px)',
-            paddingTop: { xs: '115px', md: 0 },
+            paddingTop: 0,
           }}
         >
           {/* Screen 1 — Intro */}

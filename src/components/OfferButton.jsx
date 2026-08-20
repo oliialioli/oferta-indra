@@ -6,10 +6,12 @@ import { colors } from '../theme/theme';
 // original Figma button asset's cut-corner shape. Both states use the same
 // 8-point polygon (just with cut = 0 at rest) so clip-path can transition
 // smoothly between them instead of jumping.
-const chamfer = (cut) =>
+export const chamfer = (cut) =>
   `polygon(${cut}px 0, calc(100% - ${cut}px) 0, 100% ${cut}px, 100% calc(100% - ${cut}px), calc(100% - ${cut}px) 100%, ${cut}px 100%, 0 calc(100% - ${cut}px), 0 ${cut}px)`;
 
-const cornerStyles = (cut = 14) => ({
+// Shared with any other button that wants the same hover/focus chamfer
+// (e.g. AcceptModal's CTA, which isn't a brand OfferButton variant).
+export const cornerStyles = (cut = 14) => ({
   clipPath: chamfer(0),
   transition: 'clip-path .2s cubic-bezier(.2,.8,.2,1)',
   '&:hover, &:focus-visible': { clipPath: chamfer(cut) },

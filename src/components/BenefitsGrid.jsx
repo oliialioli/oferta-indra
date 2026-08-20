@@ -9,6 +9,7 @@ import {
   PerksIcon,
 } from './icons/BenefitIcons';
 import { colors } from '../theme/theme';
+import { useRevealOnce, revealSx } from '../hooks/useRevealOnce';
 
 const ICONS = {
   emotional: EmotionalIcon,
@@ -19,10 +20,12 @@ const ICONS = {
   perks: PerksIcon,
 };
 
-function BenefitCard({ item }) {
+function BenefitCard({ item, delay }) {
   const Icon = ICONS[item.icon] || GrowthIcon;
+  const [ref, revealed] = useRevealOnce();
   return (
     <Box
+      ref={ref}
       sx={{
         background: 'rgba(255,255,255,0.1)',
         padding: '16px',
@@ -31,9 +34,12 @@ function BenefitCard({ item }) {
         justifyContent: 'space-between',
         gap: '12px',
         minHeight: 165,
+        ...revealSx(revealed, delay),
       }}
     >
-      <Icon style={{ height: 32, width: 'auto', color: colors.blanco, display: 'block' }} />
+      <Box sx={{ width: 36, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+        <Icon style={{ height: '100%', width: '100%', color: colors.blanco, display: 'block' }} />
+      </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <Typography sx={{ fontSize: 18, color: colors.blanco, margin: 0, lineHeight: 1.4 }}>
           {item.title}
@@ -56,8 +62,8 @@ export default function BenefitsGrid({ benefits }) {
         width: '100%',
       }}
     >
-      {benefits.map((item) => (
-        <BenefitCard key={item.title} item={item} />
+      {benefits.map((item, i) => (
+        <BenefitCard key={item.title} item={item} delay={(i % 3) * 80} />
       ))}
     </Box>
   );

@@ -4,13 +4,16 @@ import Typography from '@mui/material/Typography';
 import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import { colors } from '../theme/theme';
+import { useRevealOnce, revealSx } from '../hooks/useRevealOnce';
 
-function StatItem({ item }) {
+function StatItem({ item, delay }) {
   const [open, setOpen] = useState(false);
   const hasDetail = Boolean(item.detail);
+  const [ref, revealed] = useRevealOnce();
 
   return (
     <Box
+      ref={ref}
       sx={{
         background: 'rgba(255,255,255,0.1)',
         padding: '16px 32px',
@@ -19,6 +22,7 @@ function StatItem({ item }) {
         gap: '6px',
         flex: item.wide ? '1 0 100%' : '1 0 0',
         minWidth: 0,
+        ...revealSx(revealed, delay),
       }}
     >
       <Typography sx={{ fontSize: 14, color: colors.grisAcero, margin: 0 }}>
@@ -105,8 +109,8 @@ export default function StatGrid({ stats }) {
             flexDirection: { xs: 'column', sm: 'row' },
           }}
         >
-          {row.map((item) => (
-            <StatItem key={item.label} item={item} />
+          {row.map((item, j) => (
+            <StatItem key={item.label} item={item} delay={j * 80} />
           ))}
         </Box>
       ))}

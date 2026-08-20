@@ -20,10 +20,10 @@ export default function StickyCta({ onAccept }) {
         variant="sticky"
         onClick={onAccept}
         endIcon={<CheckIcon />}
-        aria-label="Aceptar oferta de Indra Group"
+        aria-label="Revisar y aceptar oferta de Indra Group"
         sx={{ justifyContent: 'center' }}
       >
-        Aceptar oferta
+        Revisar y aceptar oferta
       </OfferButton>
     </Box>
   );

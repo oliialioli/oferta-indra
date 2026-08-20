@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { colors } from '../theme/theme';
+import { cornerStyles } from './OfferButton';
 import avatarSmall from '../assets/images/buddy-avatar-small.png';
 
 export default function AcceptModal({ open, onClose, candidateName = 'Raquel' }) {
@@ -43,14 +44,16 @@ export default function AcceptModal({ open, onClose, candidateName = 'Raquel' })
         onClick={onClose}
         disableRipple
         sx={{
+          position: 'relative',
           background: colors.azulOscuro,
           color: colors.blanco,
-          borderRadius: '8px',
+          borderRadius: 0,
           padding: '13px 26px',
           fontWeight: 500,
           fontSize: '11pt',
           textTransform: 'none',
           '&:hover': { background: '#004254' },
+          ...cornerStyles(10),
         }}
       >
         Descargar y firmar aceptación

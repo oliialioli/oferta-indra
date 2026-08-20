@@ -1,10 +1,13 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { colors } from '../theme/theme';
+import { useRevealOnce, revealSx } from '../hooks/useRevealOnce';
 
-function SectorCard({ s }) {
+function SectorCard({ s, delay }) {
+  const [ref, revealed] = useRevealOnce();
   return (
     <Box
+      ref={ref}
       sx={{
         background: 'rgba(255,255,255,0.1)',
         padding: '16px',
@@ -13,6 +16,7 @@ function SectorCard({ s }) {
         justifyContent: 'flex-start',
         gap: '6px',
         minHeight: 195,
+        ...revealSx(revealed, delay),
       }}
     >
       <Typography sx={{ fontSize: 'clamp(18px, 1.8vw, 26px)', color: colors.blanco, lineHeight: 1.15, margin: 0 }}>
@@ -38,8 +42,8 @@ export default function SectorsGrid({ sectors }) {
         width: '100%',
       }}
     >
-      {sectors.map((s) => (
-        <SectorCard key={s.label} s={s} />
+      {sectors.map((s, i) => (
+        <SectorCard key={s.label} s={s} delay={(i % 3) * 80} />
       ))}
     </Box>
   );

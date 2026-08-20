@@ -1,6 +1,47 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { colors } from '../theme/theme';
+import { useRevealOnce, revealSx } from '../hooks/useRevealOnce';
+
+function ReasonItem({ reason, delay }) {
+  const isBlock = typeof reason === 'object';
+  const [ref, revealed] = useRevealOnce();
+  return (
+    <Box
+      component="li"
+      ref={ref}
+      sx={{
+        counterIncrement: 'razon',
+        background: 'rgba(255,255,255,0.1)',
+        padding: '16px',
+        display: 'flex',
+        alignItems: isBlock ? 'flex-start' : 'center',
+        gap: '6px',
+        fontSize: 16,
+        color: colors.blanco,
+        '&::before': {
+          content: 'counter(razon, decimal-leading-zero)',
+          color: colors.grisAcero,
+          flex: 'none',
+        },
+        ...revealSx(revealed, delay),
+      }}
+    >
+      {isBlock ? (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <Typography sx={{ fontSize: 16, color: colors.blanco, margin: 0, lineHeight: 1.4 }}>
+            {reason.title}
+          </Typography>
+          <Typography sx={{ fontSize: 14, color: colors.grisAcero, margin: 0, lineHeight: 1.4 }}>
+            {reason.body}
+          </Typography>
+        </Box>
+      ) : (
+        reason
+      )}
+    </Box>
+  );
+}
 
 export default function ReasonsList({ reasons }) {
   return (
@@ -17,43 +58,13 @@ export default function ReasonsList({ reasons }) {
         width: '100%',
       }}
     >
-      {reasons.map((reason) => {
-        const isBlock = typeof reason === 'object';
-        return (
-          <Box
-            component="li"
-            key={isBlock ? reason.title : reason}
-            sx={{
-              counterIncrement: 'razon',
-              background: 'rgba(255,255,255,0.1)',
-              padding: '16px',
-              display: 'flex',
-              alignItems: isBlock ? 'flex-start' : 'center',
-              gap: '6px',
-              fontSize: 16,
-              color: colors.blanco,
-              '&::before': {
-                content: 'counter(razon, decimal-leading-zero)',
-                color: colors.grisAcero,
-                flex: 'none',
-              },
-            }}
-          >
-            {isBlock ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <Typography sx={{ fontSize: 16, color: colors.blanco, margin: 0, lineHeight: 1.4 }}>
-                  {reason.title}
-                </Typography>
-                <Typography sx={{ fontSize: 14, color: colors.grisAcero, margin: 0, lineHeight: 1.4 }}>
-                  {reason.body}
-                </Typography>
-              </Box>
-            ) : (
-              reason
-            )}
-          </Box>
-        );
-      })}
+      {reasons.map((reason, i) => (
+        <ReasonItem
+          key={typeof reason === 'object' ? reason.title : reason}
+          reason={reason}
+          delay={i * 60}
+        />
+      ))}
     </Box>
   );
 }
