@@ -15,12 +15,17 @@ npm run dev
 
 | Asset | Estado |
 |---|---|
-| `public/images/indra-logo.svg` | ✅ real (subido) |
-| `public/images/top-employer-seal.png` | ✅ real (subido) |
-| `public/images/buddy-avatar-small.png` | ✅ real (subido) — usado en el modal de aceptación |
-| `public/images/buddy-avatar-poster.png` | ✅ real (misma imagen) — poster del vídeo y **fallback automático**: si `buddy-avatar.mp4` no existe o falla al cargar, `AvatarPanel` muestra esta imagen estática en su lugar, sin romper el layout |
-| `public/fonts/ForFutureSans-*.woff` (5 pesos × normal/cursiva) | ✅ real (subidos como `.otf`, convertidos a `.woff`) |
-| `public/media/buddy-avatar.mp4` | ✅ real (subido) — se reproduce automáticamente en mute al cargar; el botón "Activar audio" lo desmutea |
+| `src/assets/images/indra-logo.svg` | ✅ real (subido) |
+| `src/assets/images/top-employer-seal.png` | ✅ real (subido) |
+| `src/assets/images/buddy-avatar-small.png` | ✅ real (subido) — usado en el modal de aceptación |
+| `src/assets/images/buddy-avatar-poster.png` | ✅ real (misma imagen) — poster del vídeo y **fallback automático**: si el vídeo falla al cargar, `AvatarPanel` muestra esta imagen estática en su lugar, sin romper el layout |
+| `src/theme/fonts/ForFutureSans-*.woff` (5 pesos × normal/cursiva) | ✅ real (subidos como `.otf`, convertidos a `.woff`) |
+| `src/assets/media/buddy-avatar.mp4` | ✅ real (subido) — se reproduce automáticamente en mute al cargar; el botón "Activar audio" lo desmutea |
+
+Todos los assets viven bajo `src/` (no `public/`) e importados como módulos ES,
+para que el `base: '/oferta-indra/'` de Vite (necesario para GitHub Pages,
+que sirve el sitio bajo un subpath) se aplique automáticamente a sus rutas
+finales sin tener que prefijarlas a mano.
 
 **Nota sobre las fuentes**: los `.otf` originales pesaban ~60KB cada uno;
 no tuve acceso a red para compilar el compresor Brotli que necesita el
@@ -35,8 +40,14 @@ fonttools varLib.instancer ...  # o simplemente:
 python3 -c "from fontTools.ttLib import TTFont; f=TTFont('ForFutureSans-Regular.otf'); f.flavor='woff2'; f.save('ForFutureSans-Regular.woff2')"
 ```
 
-Si consigues el vídeo más adelante, suéltalo directamente en
-`public/media/buddy-avatar.mp4` — `AvatarPanel` lo recoge sin tocar código.
+
+## Despliegue
+
+Publicado en GitHub Pages: **https://oliialioli.github.io/oferta-indra/**
+
+Cada push a `main` dispara `.github/workflows/deploy.yml`, que compila con
+`npm run build` y publica `dist/`. El `base: '/oferta-indra/'` en
+`vite.config.js` tiene que coincidir con el nombre del repo si lo renombras.
 
 ## Estructura
 
@@ -73,12 +84,13 @@ un componente con texto real que reproduce el mismo lenguaje visual
 (fondo blanco / esquinas que aparecen al hover) en tres variantes:
 `primary`, `ghost` (el toggle de audio) y `sticky` (la barra inferior).
 
-**Iconos de beneficios → iconos de MUI.**
-Los 6 iconos de la sección "Beneficios" eran SVG de línea a medida. Los
-sustituí por iconos equivalentes de `@mui/icons-material`
-(`Schedule`, `School`, `AccountBalanceWallet`, `FavoriteBorder`,
-`LocalOffer`, `VolunteerActivism`). Si tienes los iconos de marca reales,
-son un `import` de un solo componente en `BenefitsGrid.jsx`.
+**Iconos de beneficios → SVG de marca reales.**
+Los 6 iconos de la sección "Beneficios" son los originales del Figma
+(`src/components/icons/BenefitIcons.jsx`), exportados como componentes SVG
+inline que heredan el color vía `currentColor`. Se emparejaron por tema con
+las 6 categorías actuales (bienestar emocional → balance, financiero →
+maletín, desarrollo → pin/roadmap, físico → corazón, impacto → personas,
+ventajas → regalo/tarjeta).
 
 **Mock de Gmail → omitido.**
 El HTML original envolvía todo el prototipo dentro de una simulación de

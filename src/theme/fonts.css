@@ -7,70 +7,70 @@
 
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-Light.woff') format('woff');
+  src: url('./fonts/ForFutureSans-Light.woff') format('woff');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-LightItalic.woff') format('woff');
+  src: url('./fonts/ForFutureSans-LightItalic.woff') format('woff');
   font-weight: 300;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-Regular.woff') format('woff');
+  src: url('./fonts/ForFutureSans-Regular.woff') format('woff');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-RegularItalic.woff') format('woff');
+  src: url('./fonts/ForFutureSans-RegularItalic.woff') format('woff');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-Medium.woff') format('woff');
+  src: url('./fonts/ForFutureSans-Medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-MediumItalic.woff') format('woff');
+  src: url('./fonts/ForFutureSans-MediumItalic.woff') format('woff');
   font-weight: 500;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-Bold.woff') format('woff');
+  src: url('./fonts/ForFutureSans-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-BoldItalic.woff') format('woff');
+  src: url('./fonts/ForFutureSans-BoldItalic.woff') format('woff');
   font-weight: 700;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-Black.woff') format('woff');
+  src: url('./fonts/ForFutureSans-Black.woff') format('woff');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'ForFutureSans';
-  src: url('/fonts/ForFutureSans-BlackItalic.woff') format('woff');
+  src: url('./fonts/ForFutureSans-BlackItalic.woff') format('woff');
   font-weight: 900;
   font-style: italic;
   font-display: swap;

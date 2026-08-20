@@ -4,12 +4,13 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import OfferButton from './OfferButton';
 import { colors } from '../theme/theme';
+import avatarPoster from '../assets/images/buddy-avatar-poster.png';
+import avatarVideo from '../assets/media/buddy-avatar.mp4';
 
 export default function AvatarPanel({ avatarName = 'Buddy' }) {
   const videoRef = useRef(null);
   const [audioOn, setAudioOn] = useState(false);
-  // Falls back to the static Buddy portrait if no video source is available
-  // yet (public/media/buddy-avatar.mp4 missing) or it fails to load.
+  // Falls back to the static Buddy portrait if the video fails to load.
   const [videoFailed, setVideoFailed] = useState(false);
 
   // Plays automatically exactly once on mount — never restarted or reloaded
@@ -68,7 +69,7 @@ export default function AvatarPanel({ avatarName = 'Buddy' }) {
         {videoFailed ? (
           <Box
             component="img"
-            src="/images/buddy-avatar-poster.png"
+            src={avatarPoster}
             alt={`${avatarName}, el asistente virtual de Indra Group`}
             sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
@@ -80,12 +81,12 @@ export default function AvatarPanel({ avatarName = 'Buddy' }) {
             loop
             playsInline
             preload="auto"
-            poster="/images/buddy-avatar-poster.png"
+            poster={avatarPoster}
             onError={() => setVideoFailed(true)}
             aria-label={`${avatarName}, el asistente virtual de Indra Group`}
             sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           >
-            <source src="/media/buddy-avatar.mp4" type="video/mp4" />
+            <source src={avatarVideo} type="video/mp4" />
           </Box>
         )}
       </Box>

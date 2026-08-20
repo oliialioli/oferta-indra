@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Pulls the base64-embedded fonts, video, and images out of the original
- * static HTML mockup and writes them as real files under public/, so the
- * React app can reference them by path instead of inlining megabytes of
- * base64 into the JS bundle.
+ * static HTML mockup and writes them as real files under src/, so the
+ * React app can import them and let Vite's asset pipeline hash/bundle them
+ * instead of inlining megabytes of base64 into the JS bundle.
  *
  * Usage:
  *   node scripts/extract-assets.mjs /path/to/original-oferta-indra.html
@@ -38,7 +38,7 @@ const fontNames = [
 const fontMatches = [...html.matchAll(/url\(data:font\/woff2;base64,([^)]+)\)/g)];
 fontMatches.forEach((m, i) => {
   if (fontNames[i]) {
-    writeBase64(path.join(root, 'public/fonts', fontNames[i]), m[1]);
+    writeBase64(path.join(root, 'src/theme/fonts', fontNames[i]), m[1]);
   }
 });
 if (fontMatches.length !== 4) {
@@ -48,7 +48,7 @@ if (fontMatches.length !== 4) {
 // 2) Video: the avatar loop, base64 mp4 inside a <source> tag.
 const videoMatch = html.match(/src="data:video\/mp4;base64,([^"]+)"/);
 if (videoMatch) {
-  writeBase64(path.join(root, 'public/media/buddy-avatar.mp4'), videoMatch[1]);
+  writeBase64(path.join(root, 'src/assets/media/buddy-avatar.mp4'), videoMatch[1]);
 } else {
   console.warn('No embedded video found.');
 }
@@ -66,7 +66,7 @@ const imageNames = [
 const imageMatches = [...html.matchAll(/data:image\/png;base64,([^"]+)"/g)];
 imageMatches.forEach((m, i) => {
   const name = imageNames[i] || `image-${i + 1}.png`;
-  writeBase64(path.join(root, 'public/images', name), m[1]);
+  writeBase64(path.join(root, 'src/assets/images', name), m[1]);
 });
 
-console.log('\nDone. Check public/fonts, public/media, public/images — rename/reorder if needed.');
+console.log('\nDone. Check src/theme/fonts, src/assets/media, src/assets/images — rename/reorder if needed.');

@@ -1,6 +1,8 @@
 // All copy and structured content for the offer flow lives here.
 // Swapping to a different candidate/role/company is a data-only change.
 
+import topEmployerSeal from '../assets/images/top-employer-seal.png';
+
 export const candidate = {
   name: 'Raquel',
   role: 'CNS Training Instructor',
@@ -34,7 +36,7 @@ export const screens = {
   topEmployer: {
     eyebrow: 'CNS TRAINING INSTRUCTOR',
     headline: 'Reconocidos como Top Employer y LinkedIn Top Companies 2026',
-    badgeImg: '/images/top-employer-seal.png',
+    badgeImg: topEmployerSeal,
     badgeAlt: 'Sello Top Employer España 2026',
     body: 'Reflejan nuestro compromiso con las personas: desarrollo, aprendizaje y oportunidades a largo plazo.',
     cta: '¿Construimos juntos el futuro?',

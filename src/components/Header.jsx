@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { colors } from '../theme/theme';
+import indraLogo from '../assets/images/indra-logo.svg';
 
 export default function Header({ roleLabel, progressPct }) {
   return (
@@ -22,7 +23,7 @@ export default function Header({ roleLabel, progressPct }) {
     >
       <Box
         component="img"
-        src="/images/indra-logo.svg"
+        src={indraLogo}
         alt="Indra Group"
         sx={{ height: { xs: 18, md: 28 }, width: 'auto' }}
       />

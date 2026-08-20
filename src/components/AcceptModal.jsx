@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { colors } from '../theme/theme';
+import avatarSmall from '../assets/images/buddy-avatar-small.png';
 
 export default function AcceptModal({ open, onClose, candidateName = 'Raquel' }) {
   return (
@@ -23,7 +24,7 @@ export default function AcceptModal({ open, onClose, candidateName = 'Raquel' })
     >
       <Box
         component="img"
-        src="/images/buddy-avatar-small.png"
+        src={avatarSmall}
         alt={`Buddy, el asistente virtual de Indra Group`}
         sx={{ width: 64, height: 84, objectFit: 'cover', margin: '0 auto 14px', borderRadius: '8px' }}
       />
