@@ -43,7 +43,7 @@ export default function App() {
           sx={{
             marginLeft: { xs: 0, md: 'clamp(240px, 47vw, 900px)' },
             maxWidth: 775,
-            paddingLeft: { xs: 0, md: 'clamp(8px, 1.2vw, 24px)' },
+            paddingLeft: { xs: 'clamp(20px, 2.11vw, 40px)', md: 'clamp(8px, 1.2vw, 24px)' },
             paddingRight: 'clamp(20px, 2.11vw, 40px)',
             paddingTop: 0,
             paddingBottom: { xs: '96px', md: 0 },
