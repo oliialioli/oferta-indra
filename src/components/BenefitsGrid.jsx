@@ -1,26 +1,26 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import SchoolIcon from '@mui/icons-material/School';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import {
+  EmotionalIcon,
+  FinancialIcon,
+  GrowthIcon,
+  PhysicalIcon,
+  ImpactIcon,
+  PerksIcon,
+} from './icons/BenefitIcons';
 import { colors } from '../theme/theme';
 
-// MUI icons stand in for the bespoke line-art icons in the original Figma
-// export. Swap these for real brand icon components when available.
 const ICONS = {
-  emotional: FavoriteBorderIcon,
-  financial: AccountBalanceWalletIcon,
-  growth: SchoolIcon,
-  physical: HealthAndSafetyIcon,
-  impact: VolunteerActivismIcon,
-  perks: LocalOfferIcon,
+  emotional: EmotionalIcon,
+  financial: FinancialIcon,
+  growth: GrowthIcon,
+  physical: PhysicalIcon,
+  impact: ImpactIcon,
+  perks: PerksIcon,
 };
 
 function BenefitCard({ item }) {
-  const Icon = ICONS[item.icon] || SchoolIcon;
+  const Icon = ICONS[item.icon] || GrowthIcon;
   return (
     <Box
       sx={{
@@ -33,7 +33,7 @@ function BenefitCard({ item }) {
         minHeight: 165,
       }}
     >
-      <Icon sx={{ fontSize: 32, color: colors.blanco }} />
+      <Icon style={{ height: 32, width: 'auto', color: colors.blanco, display: 'block' }} />
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <Typography sx={{ fontSize: 18, color: colors.blanco, margin: 0, lineHeight: 1.4 }}>
           {item.title}
