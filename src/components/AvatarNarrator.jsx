@@ -583,7 +583,7 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
           height: showCompactBar ? 60 : 0,
           opacity: showCompactBar ? 1 : 0,
           overflow: 'hidden',
-          padding: showCompactBar ? '0 20px' : '0 20px',
+          padding: '0 20px',
           pointerEvents: showCompactBar ? 'auto' : 'none',
           background: 'rgba(0,25,34,0.92)',
           backdropFilter: 'blur(10px)',
