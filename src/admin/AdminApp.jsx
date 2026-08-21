@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
-import { adminTheme } from '../theme/theme';
+import { adminTheme, colors } from '../theme/theme';
+import indraLogo from '../assets/images/indra-logo.svg';
 import OffersList from './OffersList';
 import UploadForm from './UploadForm';
 import ReviewForm from './ReviewForm';
@@ -25,39 +27,60 @@ export default function AdminApp() {
   return (
     <ThemeProvider theme={adminTheme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', padding: '40px 24px' }}>
-        <Typography sx={{ fontSize: 13, letterSpacing: '0.05em', color: 'text.secondary', marginBottom: '20px' }}>
-          INDRA — GENERADOR DE OFERTAS (uso interno)
-        </Typography>
+      <Box sx={{ minHeight: '100vh', background: 'background.default' }}>
+        <Box
+          component="header"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            padding: '18px 32px',
+            background: colors.azulOscuro,
+          }}
+        >
+          <Box component="img" src={indraLogo} alt="Indra Group" sx={{ height: 22, width: 'auto' }} />
+          <Typography sx={{ fontSize: 13, letterSpacing: '0.05em', color: 'rgba(255,255,255,0.75)' }}>
+            GENERADOR DE OFERTAS · USO INTERNO
+          </Typography>
+        </Box>
 
-        {view.name === 'list' && (
-          <OffersList
-            onNew={() => setView({ name: 'upload' })}
-            onSelectOffer={(slug) => setView({ name: 'loading-offer', slug })}
-          />
-        )}
+        <Box sx={{ maxWidth: 880, margin: '0 auto', padding: '40px 24px 64px' }}>
+          {view.name === 'list' && (
+            <OffersList
+              onNew={() => setView({ name: 'upload' })}
+              onSelectOffer={(slug) => setView({ name: 'loading-offer', slug })}
+            />
+          )}
 
-        {view.name === 'upload' && (
-          <UploadForm
-            onExtracted={({ extraction, sourceDocBlobUrl }) =>
-              setView({ name: 'review', extraction, sourceDocBlobUrl })
-            }
-          />
-        )}
+          {view.name === 'upload' && (
+            <UploadForm
+              onBack={() => setView({ name: 'list' })}
+              onExtracted={({ extraction, sourceDocBlobUrl }) =>
+                setView({ name: 'review', extraction, sourceDocBlobUrl })
+              }
+            />
+          )}
 
-        {view.name === 'loading-offer' && (
-          <OfferLoader slug={view.slug} onLoaded={(offer) => setView({ name: 'review', offer })} onError={() => setView({ name: 'list' })} />
-        )}
+          {view.name === 'loading-offer' && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '40px 0' }}>
+              <CircularProgress size={20} />
+              <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>Cargando oferta…</Typography>
+            </Box>
+          )}
+          {view.name === 'loading-offer' && (
+            <OfferLoader slug={view.slug} onLoaded={(offer) => setView({ name: 'review', offer })} onError={() => setView({ name: 'list' })} />
+          )}
 
-        {view.name === 'review' && (
-          <ReviewForm
-            extraction={view.extraction}
-            sourceDocBlobUrl={view.sourceDocBlobUrl}
-            offer={view.offer}
-            onBack={() => setView({ name: 'list' })}
-            onSaved={() => {}}
-          />
-        )}
+          {view.name === 'review' && (
+            <ReviewForm
+              extraction={view.extraction}
+              sourceDocBlobUrl={view.sourceDocBlobUrl}
+              offer={view.offer}
+              onBack={() => setView({ name: 'list' })}
+              onSaved={() => {}}
+            />
+          )}
+        </Box>
       </Box>
     </ThemeProvider>
   );
@@ -68,5 +91,5 @@ function OfferLoader({ slug, onLoaded, onError }) {
     getOffer(slug).then(onLoaded).catch(onError);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
-  return <Typography sx={{ fontSize: 14 }}>Cargando oferta…</Typography>;
+  return null;
 }

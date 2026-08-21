@@ -3,6 +3,11 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
+import Chip from '@mui/material/Chip';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
+import LinkIcon from '@mui/icons-material/Link';
 import { createOffer, updateOffer } from './adminApi';
 
 function extractionToFields(extraction) {
@@ -62,26 +67,41 @@ function fieldsToPayload(fields, sourceDocBlobUrl) {
   };
 }
 
-const CONFIDENCE_WARNING = {
-  missing: 'No se encontró esta etiqueta en el documento — introdúcelo manualmente.',
-  ambiguous: 'Se encontró la etiqueta pero no se pudo interpretar el valor — revísalo.',
+const CONFIDENCE_CHIP = {
+  missing: { label: 'Falta en el documento', color: 'warning' },
+  ambiguous: { label: 'Revisar', color: 'warning' },
 };
 
-function FieldRow({ label, value, onChange, warning, required, type = 'text' }) {
+function FieldRow({ label, value, onChange, confidence, required, type = 'text', helperText }) {
+  const chip = confidence && CONFIDENCE_CHIP[confidence];
   return (
-    <Box sx={{ marginBottom: '14px' }}>
+    <Box sx={{ marginBottom: '16px' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+        <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+          {label}
+          {required ? ' *' : ''}
+        </Typography>
+        {chip && <Chip size="small" label={chip.label} color={chip.color} variant="outlined" />}
+      </Box>
       <TextField
-        label={label}
         value={value}
         onChange={onChange}
         type={type}
         required={required}
         fullWidth
         size="small"
-        error={Boolean(warning)}
-        helperText={warning}
+        helperText={helperText}
       />
     </Box>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <Paper variant="outlined" sx={{ padding: '20px', marginBottom: '20px' }}>
+      <Typography sx={{ fontSize: 15, fontWeight: 500, marginBottom: '16px' }}>{title}</Typography>
+      {children}
+    </Paper>
   );
 }
 
@@ -96,7 +116,7 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  const warningFor = (key) => (!isEditing && extraction ? CONFIDENCE_WARNING[extraction[key]?.confidence] : undefined);
+  const confidenceFor = (key) => (!isEditing && extraction ? extraction[key]?.confidence : undefined);
 
   const handleChange = (key) => (e) => setFields((f) => ({ ...f, [key]: e.target.value }));
 
@@ -126,48 +146,72 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
   };
 
   return (
-    <Box sx={{ maxWidth: 560 }}>
-      <Button onClick={onBack} sx={{ marginBottom: '16px' }}>
+    <Box sx={{ maxWidth: 640 }}>
+      <Button onClick={onBack} sx={{ marginBottom: '16px', paddingLeft: 0 }}>
         ← Volver
       </Button>
 
-      <Typography sx={{ fontSize: 22, marginBottom: '4px' }}>Revisar datos de la oferta</Typography>
-      <Typography sx={{ fontSize: 14, color: 'rgba(0,0,0,0.6)', marginBottom: '20px' }}>
+      <Typography sx={{ fontSize: 24, marginBottom: '6px' }}>Revisar datos de la oferta</Typography>
+      <Typography sx={{ fontSize: 14, color: 'text.secondary', marginBottom: '24px' }}>
         Confirma o corrige cada campo antes de guardar. La extracción automática nunca
-        publica directamente.
+        publica directamente — los campos marcados como "falta" o "revisar" necesitan tu
+        atención.
       </Typography>
 
-      <FieldRow label="Nombre completo del candidato" value={fields.candidateFullName} onChange={handleChange('candidateFullName')} warning={warningFor('candidateFullName')} required />
-      <FieldRow label="Nombre de pila (para el saludo)" value={fields.candidateFirstName} onChange={handleChange('candidateFirstName')} warning={warningFor('candidateFirstName')} required />
-      <FieldRow
-        label="Puesto a mostrar en la web (no es la categoría laboral)"
-        value={fields.role}
-        onChange={handleChange('role')}
-        required
-      />
-      <FieldRow label="Categoría (convenio/clasificación laboral)" value={fields.categoria} onChange={handleChange('categoria')} warning={warningFor('categoria')} />
-      <FieldRow label="Fecha de incorporación (AAAA-MM-DD)" value={fields.fechaIncorporacion} onChange={handleChange('fechaIncorporacion')} warning={warningFor('fechaIncorporacion')} />
-      <FieldRow label="Tipo de contrato" value={fields.tipoContrato} onChange={handleChange('tipoContrato')} warning={warningFor('tipoContrato')} />
-      <FieldRow label="Convenio colectivo" value={fields.convenioColectivo} onChange={handleChange('convenioColectivo')} warning={warningFor('convenioColectivo')} />
-      <FieldRow label="Centro de trabajo" value={fields.centroTrabajo} onChange={handleChange('centroTrabajo')} warning={warningFor('centroTrabajo')} />
-      <FieldRow label="Periodo de prueba (meses)" value={fields.periodoPruebaMeses} onChange={handleChange('periodoPruebaMeses')} warning={warningFor('periodoPruebaMeses')} type="number" />
-      <FieldRow label="Retribución anual bruta (€)" value={fields.retribucionAmount} onChange={handleChange('retribucionAmount')} warning={warningFor('retribucionAnualBruta')} type="number" />
-      <FieldRow label="Nota de pagas (ej. 'en 14 pagas')" value={fields.retribucionPayFrequencyNote} onChange={handleChange('retribucionPayFrequencyNote')} />
-      <FieldRow label="Slug de la URL (déjalo en blanco para generarlo)" value={fields.slug} onChange={handleChange('slug')} />
+      <Section title="Candidato">
+        <FieldRow label="Nombre completo" value={fields.candidateFullName} onChange={handleChange('candidateFullName')} confidence={confidenceFor('candidateFullName')} required />
+        <FieldRow label="Nombre de pila (para el saludo)" value={fields.candidateFirstName} onChange={handleChange('candidateFirstName')} confidence={confidenceFor('candidateFirstName')} required />
+        <FieldRow
+          label="Puesto a mostrar en la web"
+          value={fields.role}
+          onChange={handleChange('role')}
+          required
+          helperText="No es la categoría del convenio — es el título que verá el candidato."
+        />
+      </Section>
 
-      {error && <Typography sx={{ fontSize: 14, color: '#b00020', marginBottom: '16px' }}>{error}</Typography>}
+      <Section title="Condiciones laborales">
+        <FieldRow label="Categoría (convenio/clasificación laboral)" value={fields.categoria} onChange={handleChange('categoria')} confidence={confidenceFor('categoria')} />
+        <FieldRow label="Fecha de incorporación (AAAA-MM-DD)" value={fields.fechaIncorporacion} onChange={handleChange('fechaIncorporacion')} confidence={confidenceFor('fechaIncorporacion')} />
+        <FieldRow label="Tipo de contrato" value={fields.tipoContrato} onChange={handleChange('tipoContrato')} confidence={confidenceFor('tipoContrato')} />
+        <FieldRow label="Convenio colectivo" value={fields.convenioColectivo} onChange={handleChange('convenioColectivo')} confidence={confidenceFor('convenioColectivo')} />
+        <FieldRow label="Centro de trabajo" value={fields.centroTrabajo} onChange={handleChange('centroTrabajo')} confidence={confidenceFor('centroTrabajo')} />
+        <FieldRow label="Periodo de prueba (meses)" value={fields.periodoPruebaMeses} onChange={handleChange('periodoPruebaMeses')} confidence={confidenceFor('periodoPruebaMeses')} type="number" />
+      </Section>
 
-      {publishedUrl && (
-        <Typography sx={{ fontSize: 14, marginBottom: '16px', wordBreak: 'break-all' }}>
-          Publicada: <a href={publishedUrl}>{publishedUrl}</a>
-        </Typography>
+      <Section title="Retribución">
+        <FieldRow label="Retribución anual bruta (€)" value={fields.retribucionAmount} onChange={handleChange('retribucionAmount')} confidence={confidenceFor('retribucionAnualBruta')} type="number" />
+        <FieldRow label="Nota de pagas (ej. 'en 14 pagas')" value={fields.retribucionPayFrequencyNote} onChange={handleChange('retribucionPayFrequencyNote')} />
+      </Section>
+
+      <Section title="Enlace">
+        <FieldRow label="Slug de la URL (déjalo en blanco para generarlo)" value={fields.slug} onChange={handleChange('slug')} />
+        {publishedUrl && (
+          <Alert icon={<LinkIcon fontSize="small" />} severity="success" sx={{ marginTop: '4px' }}>
+            Publicada:{' '}
+            <a href={publishedUrl} style={{ color: 'inherit', wordBreak: 'break-all' }}>
+              {publishedUrl}
+            </a>
+          </Alert>
+        )}
+      </Section>
+
+      {error && (
+        <Alert severity="error" sx={{ marginBottom: '16px' }}>
+          {error}
+        </Alert>
       )}
 
       <Box sx={{ display: 'flex', gap: '12px' }}>
         <Button variant="outlined" disabled={saving} onClick={() => save(false)}>
           Guardar borrador
         </Button>
-        <Button variant="contained" disabled={saving} onClick={() => save(true)}>
+        <Button
+          variant="contained"
+          disabled={saving}
+          onClick={() => save(true)}
+          startIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
+        >
           {status === 'published' ? 'Actualizar publicación' : 'Publicar'}
         </Button>
       </Box>

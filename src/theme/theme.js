@@ -66,14 +66,23 @@ const theme = createTheme({
 export const adminTheme = createTheme({
   palette: {
     mode: 'light',
-    background: { default: '#f5f5f0', paper: '#ffffff' },
-    text: { primary: '#111111', secondary: 'rgba(0,0,0,0.6)' },
+    background: { default: '#f4f5f3', paper: '#ffffff' },
+    primary: { main: colors.azulOscuro, contrastText: colors.blanco },
+    text: { primary: '#16232a', secondary: 'rgba(22,35,42,0.62)' },
+    success: { main: '#1e7e42' },
+    warning: { main: '#a8631a' },
+    divider: 'rgba(22,35,42,0.1)',
   },
   typography: {
     fontFamily: 'var(--font-stack)',
   },
   shape: {
-    borderRadius: 4,
+    borderRadius: 8,
+  },
+  components: {
+    MuiButtonBase: {
+      defaultProps: { disableRipple: true },
+    },
   },
 });
 
