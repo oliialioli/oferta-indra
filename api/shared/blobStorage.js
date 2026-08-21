@@ -1,0 +1,39 @@
+// Azure Blob Storage wrapper — keeps the raw uploaded offer letter for
+// audit/re-extraction purposes. Never served to the public offer viewer.
+
+const { BlobServiceClient } = require('@azure/storage-blob');
+
+const CONTAINER_NAME = 'offer-source-documents';
+
+let containerPromise;
+
+function getContainer() {
+  if (!containerPromise) {
+    containerPromise = (async () => {
+      const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+      if (!connectionString) {
+        throw new Error('AZURE_STORAGE_CONNECTION_STRING is not set — see api/local.settings.json.example');
+      }
+      const service = BlobServiceClient.fromConnectionString(connectionString);
+      const container = service.getContainerClient(CONTAINER_NAME);
+      await container.createIfNotExists();
+      return container;
+    })().catch((err) => {
+      // Don't cache a failed connection attempt forever — a transient
+      // failure (emulator not started yet, network hiccup) would otherwise
+      // permanently break every request until the process restarts.
+      containerPromise = null;
+      throw err;
+    });
+  }
+  return containerPromise;
+}
+
+async function uploadSourceDocument(id, filename, buffer) {
+  const container = await getContainer();
+  const blockBlob = container.getBlockBlobClient(`${id}/${filename}`);
+  await blockBlob.uploadData(buffer);
+  return blockBlob.url;
+}
+
+module.exports = { uploadSourceDocument };

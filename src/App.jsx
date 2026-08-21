@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import Header from './components/Header';
 import AvatarNarrator from './components/AvatarNarrator';
 import Screen from './components/Screen';
@@ -13,11 +14,14 @@ import AcceptModal from './components/AcceptModal';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckIcon from '@mui/icons-material/Check';
 import { useRevealOnScroll } from './hooks/useRevealOnScroll';
-import { candidate, screens, stats, benefits, reasons, sectors } from './data/offerData';
+import { useOfferData } from './data/useOfferData';
+import { benefits, reasons, sectors } from './data/staticOfferData';
+import { colors } from './theme/theme';
 
 const SCREEN_COUNT = 5;
 
-export default function App() {
+export default function App({ slug }) {
+  const { candidate, screens, stats, loading, error } = useOfferData(slug);
   const { register, revealed, activeIndex, scrollToNext } = useRevealOnScroll(SCREEN_COUNT);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -26,6 +30,24 @@ export default function App() {
     [activeIndex]
   );
   const sectionLabel = `${activeIndex + 1} de ${SCREEN_COUNT}`;
+
+  if (loading) {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography sx={{ color: colors.grisAcero }}>Cargando tu oferta…</Typography>
+      </Box>
+    );
+  }
+
+  if (error || !candidate || !screens || !stats) {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+        <Typography sx={{ color: colors.blanco, fontSize: 20 }}>
+          Esta oferta no existe o ha caducado.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <>

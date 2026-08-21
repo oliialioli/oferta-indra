@@ -2,3 +2,7 @@ node_modules
 dist
 .DS_Store
 *.local
+api/local.settings.json
+api/node_modules
+__azurite_*
+azurite-*
