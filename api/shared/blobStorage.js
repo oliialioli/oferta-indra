@@ -1,9 +1,18 @@
-// Azure Blob Storage wrapper — keeps the raw uploaded offer letter for
-// audit/re-extraction purposes. Never served to the public offer viewer.
+// Azure Blob Storage wrapper — keeps the raw uploaded offer letter, both
+// for audit/re-extraction purposes and so the candidate can download the
+// original document from the offer page (see offersDownloadDocument.js).
+// The container stays private (no public/anonymous access) — downloads
+// are always proxied through our own API, which checks the offer is
+// actually published before serving anything.
 
 const { BlobServiceClient } = require('@azure/storage-blob');
 
 const CONTAINER_NAME = 'offer-source-documents';
+
+const CONTENT_TYPES = {
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  pdf: 'application/pdf',
+};
 
 let containerPromise;
 
@@ -31,9 +40,21 @@ function getContainer() {
 
 async function uploadSourceDocument(id, filename, buffer) {
   const container = await getContainer();
-  const blockBlob = container.getBlockBlobClient(`${id}/${filename}`);
+  const blobName = `${id}/${filename}`;
+  const blockBlob = container.getBlockBlobClient(blobName);
   await blockBlob.uploadData(buffer);
-  return blockBlob.url;
+  return { url: blockBlob.url, blobName };
 }
 
-module.exports = { uploadSourceDocument };
+async function downloadSourceDocument(blobName) {
+  const container = await getContainer();
+  const blockBlob = container.getBlockBlobClient(blobName);
+  const downloadResponse = await blockBlob.downloadToBuffer();
+  const extension = blobName.split('.').pop()?.toLowerCase();
+  return {
+    buffer: downloadResponse,
+    contentType: CONTENT_TYPES[extension] || 'application/octet-stream',
+  };
+}
+
+module.exports = { uploadSourceDocument, downloadSourceDocument };

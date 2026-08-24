@@ -51,10 +51,12 @@ function offerToFields(offer) {
   };
 }
 
-function fieldsToPayload(fields, sourceDocBlobUrl) {
+function fieldsToPayload(fields, sourceDoc) {
   return {
     slug: fields.slug || undefined,
-    sourceDocBlobUrl: sourceDocBlobUrl || null,
+    sourceDocBlobUrl: sourceDoc?.sourceDocBlobUrl || null,
+    sourceDocBlobName: sourceDoc?.sourceDocBlobName || null,
+    sourceDocFileName: sourceDoc?.sourceDocFileName || null,
     letter: {
       candidateFullName: fields.candidateFullName,
       candidateFirstName: fields.candidateFirstName,
@@ -113,7 +115,15 @@ function Section({ title, children }) {
   );
 }
 
-export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSaved, onBack }) {
+export default function ReviewForm({
+  extraction,
+  sourceDocBlobUrl,
+  sourceDocBlobName,
+  sourceDocFileName,
+  offer,
+  onSaved,
+  onBack,
+}) {
   const isEditing = Boolean(offer);
   const [fields, setFields] = useState(() => (isEditing ? offerToFields(offer) : extractionToFields(extraction)));
   const [slugState, setSlugState] = useState(offer?.slug || null);
@@ -137,7 +147,11 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
     setSaving(true);
     setError(null);
     try {
-      const payload = fieldsToPayload(fields, sourceDocBlobUrl || offer?.sourceDocBlobUrl);
+      const payload = fieldsToPayload(fields, {
+        sourceDocBlobUrl: sourceDocBlobUrl || offer?.sourceDocBlobUrl,
+        sourceDocBlobName: sourceDocBlobName || offer?.sourceDocBlobName,
+        sourceDocFileName: sourceDocFileName || offer?.sourceDocFileName,
+      });
       let result;
       if (slugState) {
         result = await updateOffer(slugState, { ...payload, publish });

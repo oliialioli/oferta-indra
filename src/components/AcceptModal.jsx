@@ -6,7 +6,8 @@ import { colors } from '../theme/theme';
 import { cornerStyles } from './OfferButton';
 import avatarSmall from '../assets/images/buddy-avatar-small.png';
 
-export default function AcceptModal({ open, onClose, candidateName = 'Raquel' }) {
+export default function AcceptModal({ open, onClose, candidateName = 'Raquel', slug }) {
+  const downloadUrl = slug ? `/api/offers/${encodeURIComponent(slug)}/document` : null;
   return (
     <Dialog
       open={open}
@@ -41,6 +42,9 @@ export default function AcceptModal({ open, onClose, candidateName = 'Raquel' })
         ¡Gracias por unirte a nuestro equipo, {candidateName}!
       </Typography>
       <Button
+        component={downloadUrl ? 'a' : 'button'}
+        href={downloadUrl || undefined}
+        download={downloadUrl ? true : undefined}
         onClick={onClose}
         disableRipple
         sx={{

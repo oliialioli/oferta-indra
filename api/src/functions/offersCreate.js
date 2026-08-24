@@ -33,6 +33,8 @@ app.http('offersCreate', {
       publishedAt: null,
       emailSentAt: null,
       sourceDocBlobUrl: body.sourceDocBlobUrl || null,
+      sourceDocBlobName: body.sourceDocBlobName || null,
+      sourceDocFileName: body.sourceDocFileName || null,
       letter: body.letter,
       display: body.display,
       boilerplateStats: body.boilerplateStats || defaultBoilerplateStats,

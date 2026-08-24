@@ -55,9 +55,7 @@ export default function AdminApp() {
           {view.name === 'upload' && (
             <UploadForm
               onBack={() => setView({ name: 'list' })}
-              onExtracted={({ extraction, sourceDocBlobUrl }) =>
-                setView({ name: 'review', extraction, sourceDocBlobUrl })
-              }
+              onExtracted={(result) => setView({ name: 'review', ...result })}
             />
           )}
 
@@ -75,6 +73,8 @@ export default function AdminApp() {
             <ReviewForm
               extraction={view.extraction}
               sourceDocBlobUrl={view.sourceDocBlobUrl}
+              sourceDocBlobName={view.sourceDocBlobName}
+              sourceDocFileName={view.sourceDocFileName}
               offer={view.offer}
               onBack={() => setView({ name: 'list' })}
               onSaved={() => {}}

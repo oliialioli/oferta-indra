@@ -178,6 +178,7 @@ export default function App({ slug }) {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         candidateName={candidate.name}
+        slug={slug}
       />
     </>
   );

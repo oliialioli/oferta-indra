@@ -36,8 +36,14 @@ app.http('offersExtract', {
     }
 
     const extraction = extractOfferFields(text);
-    const sourceDocBlobUrl = await uploadSourceDocument(`tmp-${Date.now()}`, file.name, buffer);
+    const { url: sourceDocBlobUrl, blobName: sourceDocBlobName } = await uploadSourceDocument(
+      `tmp-${Date.now()}`,
+      file.name,
+      buffer
+    );
 
-    return { jsonBody: { extraction, sourceDocBlobUrl } };
+    return {
+      jsonBody: { extraction, sourceDocBlobUrl, sourceDocBlobName, sourceDocFileName: file.name },
+    };
   },
 });
