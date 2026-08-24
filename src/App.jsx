@@ -11,6 +11,7 @@ import StickyCta from './components/StickyCta';
 import AcceptModal from './components/AcceptModal';
 import { useRevealOnScroll } from './hooks/useRevealOnScroll';
 import { useNarrator } from './hooks/useNarrator';
+import { useScrollLock } from './hooks/useScrollLock';
 import { buildScreens, benefits, reasons, sectors, devFixtureOffer } from './data/staticOfferData';
 
 const SCREEN_COUNT = 5;
@@ -25,6 +26,12 @@ export default function App() {
   // text can be highlighted in sync with the same audio element/state —
   // see NarratedText.jsx.
   const narrator = useNarrator({ activeIndex, modalOpen });
+  // Mandatory once per session, not a permanent gate: locks scroll only
+  // until the intro screen's audio choice is made (or was already made
+  // earlier this session — see useNarrator's sessionStorage read) — needed
+  // both so everyone actually sees that choice exists and because playing
+  // audio at all requires a real user gesture in most browsers.
+  useScrollLock(!narrator.audioDecided);
 
   const progressPct = useMemo(
     () => Math.round((activeIndex / (SCREEN_COUNT - 1)) * 100),

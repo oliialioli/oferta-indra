@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { colors } from '../theme/theme';
@@ -76,11 +77,13 @@ const variantMap = {
  * variant: 'primary' (white, used for "Continue" CTAs) | 'ghost' (outline,
  * used for the audio toggle) | 'sticky' (translucent full-width bottom CTA)
  */
-export default function OfferButton({ variant = 'primary', children, icon, endIcon, ...props }) {
+const OfferButton = forwardRef(function OfferButton({ variant = 'primary', children, icon, endIcon, ...props }, ref) {
   const Component = variantMap[variant] || PrimaryButton;
   return (
-    <Component startIcon={icon} endIcon={endIcon} {...props}>
+    <Component ref={ref} startIcon={icon} endIcon={endIcon} {...props}>
       {children}
     </Component>
   );
-}
+});
+
+export default OfferButton;

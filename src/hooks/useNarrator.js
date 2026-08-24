@@ -3,6 +3,27 @@ import { narratorSections, confirmationSection } from '../data/narratorConfig';
 
 const SECTION_DEBOUNCE_MS = 500; // let a section actually settle in view before its audio starts (~400-600ms)
 const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows before confirmation/idle
+const AUDIO_CHOICE_KEY = 'oferta-indra:audio-choice';
+
+// The intro screen's audio choice is mandatory once per session (see
+// App.jsx's useScrollLock) — reloading mid-session shouldn't ask again or
+// re-lock scroll, so the choice is remembered in sessionStorage. Wrapped in
+// try/catch since storage can throw in private-browsing contexts.
+function readStoredAudioChoice() {
+  try {
+    return sessionStorage.getItem(AUDIO_CHOICE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredAudioChoice(value) {
+  try {
+    sessionStorage.setItem(AUDIO_CHOICE_KEY, value);
+  } catch {
+    // ignore — nothing we can do if storage is unavailable
+  }
+}
 
 // The narrator's single state machine: idle | presenting | talking |
 // listening | confirmation, plus a separate audioPhase that drives the
@@ -24,12 +45,17 @@ const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows bef
 // it (see heardSectionsRef) — only the manual "Volver a escuchar" control
 // does.
 export function useNarrator({ activeIndex, modalOpen }) {
+  // Read once, on mount, whether this session already answered the audio
+  // choice — a reload shouldn't ask again or replay the greeting/re-lock
+  // scroll (see App.jsx's useScrollLock, gated on !audioDecided).
+  const [storedChoice] = useState(readStoredAudioChoice);
   // Starts on the one-shot greeting gesture (see narratorVideos.js) rather
   // than idle — it's the very first thing a visitor sees, before the
-  // intro screen's audio choice even renders.
-  const [state, setState] = useState('greeting');
-  const [audioEnabled, setAudioEnabled] = useState(false);
-  const [audioDecided, setAudioDecided] = useState(false);
+  // intro screen's audio choice even renders. Skipped entirely if the
+  // choice was already made earlier this session.
+  const [state, setState] = useState(() => (storedChoice ? 'idle' : 'greeting'));
+  const [audioEnabled, setAudioEnabled] = useState(() => storedChoice === 'enabled');
+  const [audioDecided, setAudioDecided] = useState(() => Boolean(storedChoice));
   const [audioPhase, setAudioPhase] = useState('inactive');
   const [justFinished, setJustFinished] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -218,6 +244,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
   const enableAudio = useCallback(() => {
     setAudioEnabled(true);
     setAudioDecided(true);
+    writeStoredAudioChoice('enabled');
     cancelAll();
     lastEnteredIndexRef.current = activeIndex;
     heardSectionsRef.current.add(section.id);
@@ -229,6 +256,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
   // again (the invite card itself only shows while !audioDecided).
   const declineAudio = useCallback(() => {
     setAudioDecided(true);
+    writeStoredAudioChoice('declined');
   }, []);
 
   const pauseAudio = useCallback(() => {
