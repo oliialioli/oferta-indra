@@ -20,7 +20,7 @@ const { candidate, stats } = devFixtureOffer;
 const screens = buildScreens(candidate);
 
 export default function App() {
-  const { register, revealed, activeIndex, scrollToNext } = useRevealOnScroll(SCREEN_COUNT);
+  const { register, revealed, activeIndex, scrollToNext, scrollToPrev } = useRevealOnScroll(SCREEN_COUNT);
   const [modalOpen, setModalOpen] = useState(false);
   // Owned here (not inside AvatarNarrator) so the active Screen's own body
   // text can be highlighted in sync with the same audio element/state —
@@ -149,6 +149,7 @@ export default function App() {
         activeIndex={activeIndex}
         screenCount={SCREEN_COUNT}
         onNext={scrollToNext}
+        onPrev={scrollToPrev}
       />
 
       <AcceptModal open={modalOpen} onClose={() => setModalOpen(false)} candidateName={candidate.name} />
