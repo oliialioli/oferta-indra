@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import OfferButton from './OfferButton';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { colors } from '../theme/theme';
 
 const CYAN = '#22D3EE';
@@ -21,12 +20,14 @@ function WaveformIcon() {
 }
 
 // The one-time, explicit choice for whether Buddy narrates at all — shown
-// only on the intro screen, in place of its body text, and only until the
-// visitor picks one of the two options. Deliberately not a modal: it sits
-// exactly where the karaoke text will appear once a choice is made, so
-// choosing feels like a natural first step in reading this screen rather
-// than an interruption blocking it.
-export default function AudioInviteCard({ onStart, onSkip }) {
+// only on the intro screen, in place of its body text, until the visitor
+// picks one of the two options. Purely informational: the actual choice
+// lives in the sticky bottom bar (see StickyCta.jsx's audioDecided mode),
+// not as buttons here — having "Comenzar con Buddy" / "Ver sin audio" both
+// in this card AND competing with "Aceptar oferta" / "Siguiente" in the
+// bar below was two simultaneous decisions crowding one screen, and the
+// accept action was reachable before there was anything to review yet.
+export default function AudioInviteCard() {
   return (
     <Box
       sx={{
@@ -59,24 +60,11 @@ export default function AudioInviteCard({ onStart, onSkip }) {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: '6px', md: '10px' }, flexWrap: 'wrap' }}>
-        <OfferButton
-          onClick={onStart}
-          icon={<VolumeUpIcon />}
-          aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
-          sx={{ padding: { xs: '9px 12px', md: '11px 18px' }, fontSize: { xs: 13, md: 15 }, gap: { xs: '6px', md: '8px' } }}
-        >
-          Comenzar con Buddy
-        </OfferButton>
-
-        <OfferButton
-          variant="ghost"
-          onClick={onSkip}
-          aria-label="Continuar sin narración de audio"
-          sx={{ padding: { xs: '9px 12px', md: '11px 18px' }, fontSize: { xs: 13, md: 15 } }}
-        >
-          Ver sin audio
-        </OfferButton>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <ArrowDownwardIcon aria-hidden="true" sx={{ fontSize: 15, color: colors.grisAcero }} />
+        <Typography sx={{ fontSize: 13, color: colors.grisAcero, margin: 0 }}>
+          Elige cómo quieres comenzar, abajo
+        </Typography>
       </Box>
     </Box>
   );

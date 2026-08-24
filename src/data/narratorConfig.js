@@ -32,7 +32,8 @@ export const narratorSections = [
     narrationText: () =>
       '¡Hola! Te damos la bienvenida. En este espacio podrás conocer tu propuesta y descubrir todo lo que Indra Group pone a tu disposición para crecer, aprender y generar un impacto real.',
     secondaryText: () => 'Aquí encontrarás toda la información necesaria para tomar tu decisión con confianza.',
-    closingText: () => ['Together, One Mission.'],
+    // No closingText here — reserved for the actual closing (confirmationSection,
+    // topEmployer), not the intro.
     audioSrc: welcomeAudio,
     wordTimestamps: null,
   },

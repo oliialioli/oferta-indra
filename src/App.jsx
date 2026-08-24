@@ -67,7 +67,7 @@ export default function App() {
             body={screens.intro.body}
             narrated={narratedFor(0)}
             wordTimestamps={screens.intro.wordTimestamps}
-            audioInvite={{ show: !narrator.audioDecided, onStart: narrator.enableAudio, onSkip: narrator.declineAudio }}
+            audioInvite={{ show: !narrator.audioDecided }}
             secondaryText={screens.intro.secondaryText}
             closingText={screens.intro.closingText}
           />
@@ -134,6 +134,9 @@ export default function App() {
         activeIndex={activeIndex}
         screenCount={SCREEN_COUNT}
         onNext={scrollToNext}
+        audioDecided={narrator.audioDecided}
+        onStartAudio={narrator.enableAudio}
+        onSkipAudio={narrator.declineAudio}
       />
 
       <AcceptModal open={modalOpen} onClose={() => setModalOpen(false)} candidateName={candidate.name} />
