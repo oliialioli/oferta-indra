@@ -24,7 +24,10 @@ const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows bef
 // it (see heardSectionsRef) — only the manual "Volver a escuchar" control
 // does.
 export function useNarrator({ activeIndex, modalOpen }) {
-  const [state, setState] = useState('idle');
+  // Starts on the one-shot greeting gesture (see narratorVideos.js) rather
+  // than idle — it's the very first thing a visitor sees, before the
+  // intro screen's audio choice even renders.
+  const [state, setState] = useState('greeting');
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioDecided, setAudioDecided] = useState(false);
   const [audioPhase, setAudioPhase] = useState('inactive');
@@ -65,6 +68,16 @@ export function useNarrator({ activeIndex, modalOpen }) {
     return () => {
       mountedRef.current = false;
     };
+  }, []);
+
+  // Fallback for the greeting video ending before the debounced
+  // section-entry effect below has had its own chance to wire up this
+  // same handler (only matters if the clip is shorter than
+  // SECTION_DEBOUNCE_MS) — without this, handleVideoEnded would fire
+  // against a still-null onPresentingEndedRef and Buddy would freeze on
+  // the greeting's last frame instead of settling into idle.
+  useEffect(() => {
+    onPresentingEndedRef.current = () => setState('idle');
   }, []);
 
   const section = modalOpen ? confirmationSection : narratorSections[activeIndex] ?? narratorSections[0];
@@ -159,11 +172,20 @@ export function useNarrator({ activeIndex, modalOpen }) {
       cancelAll();
       const sec = narratorSections[activeIndex] ?? narratorSections[0];
       if (isFirstEntryRef.current) {
-        // Never autoplay anything (video or audio) on first load — the
-        // intro screen's own AudioInviteCard is what makes that call.
+        // Never autoplay audio on first load — the intro screen's own
+        // audio choice (in the sticky bar) is what makes that call. The
+        // one-shot greeting gesture is the exception: it's already been
+        // playing since mount (see the initial state above), so leave it
+        // running rather than cutting it to idle — cancelAll() just above
+        // nulled its onEnded handler, so re-wire it here to settle into
+        // idle once the clip actually finishes.
         isFirstEntryRef.current = false;
-        setState('idle');
         setAudioPhase('inactive');
+        const runId = runIdRef.current;
+        onPresentingEndedRef.current = () => {
+          if (runIdRef.current !== runId) return;
+          setState('idle');
+        };
         return;
       }
       runSectionEntry(sec);
