@@ -4,14 +4,11 @@
 // the API — see useOfferData.js) it stays a plain static module, imported
 // and bundled at build time exactly like before.
 //
-// Each screen's `body` is now exactly the narrator's spoken script (see
-// narratorConfig.js) rather than separate marketing copy — the right-hand
-// body paragraph IS what's being narrated, highlighted word-by-word in
-// sync with the audio (see NarratedText.jsx), instead of duplicating a
-// transcript in a separate block under the avatar. Since the audio is a
-// fixed pre-recorded track, that text can never contain personal data —
-// `greeting` carries the one bit of personalization ("Hola, {name},") as
-// its own short line, rendered above the headline, never narrated/highlighted.
+// Every screen's copy (eyebrow, title, narrated body, secondary/closing
+// text) is resolved from the single centralized source in
+// narratorConfig.js — see buildScreens() below — so nothing is duplicated
+// or can drift out of sync between what Buddy narrates and what's shown
+// on screen.
 
 import topEmployerSeal from '../assets/images/top-employer-seal.png';
 import linkedinTopCompaniesSeal from '../assets/images/linkedin-top-companies-seal.png';
@@ -19,42 +16,24 @@ import { narratorSections } from './narratorConfig';
 
 const SECTION_ORDER = ['intro', 'details', 'benefits', 'topEmployer', 'sectors'];
 
-export const screenTemplates = {
-  intro: {
-    eyebrow: (candidate) => candidate.role.toUpperCase(),
-    greeting: (candidate) => `Hola, ${candidate.name},`,
-    headline: () => 'Tu próxima misión puede comenzar aquí.',
-    tagline: () => 'Together, One Mission.',
-  },
-  details: {
-    eyebrow: (candidate) => candidate.role.toUpperCase(),
-    headline: () => 'Tu propuesta para unirte a Indra Group',
-  },
-  benefits: {
-    eyebrow: (candidate) => candidate.role.toUpperCase(),
-    headline: () => 'Todo lo que ponemos a tu disposición para crecer y cuidarte',
-  },
-  topEmployer: {
-    eyebrow: (candidate) => candidate.role.toUpperCase(),
-    headline: () => 'Reconocidos como Top Employer y LinkedIn Top Companies 2026',
-    badges: () => [
-      { src: topEmployerSeal, alt: 'Sello Top Employer España 2026' },
-      { src: linkedinTopCompaniesSeal, alt: 'Sello LinkedIn Top Companies España 2026' },
-    ],
-    tagline: () => 'Together, One Mission.',
-  },
-  sectors: {
-    eyebrow: (candidate) => candidate.role.toUpperCase(),
-    headline: () => 'Tu talento puede ayudarnos a construir el futuro.',
-  },
-};
+const topEmployerBadges = [
+  { src: topEmployerSeal, alt: 'Sello Top Employer España' },
+  { src: linkedinTopCompaniesSeal, alt: 'Sello LinkedIn Top Companies España' },
+];
 
 export function buildScreens(candidate) {
   return Object.fromEntries(
     SECTION_ORDER.map((screenKey, i) => {
-      const fields = screenTemplates[screenKey];
-      const resolved = Object.fromEntries(Object.entries(fields).map(([field, resolve]) => [field, resolve(candidate)]));
-      resolved.body = narratorSections[i].message();
+      const section = narratorSections[i];
+      const resolved = {
+        eyebrowLines: section.eyebrowLines(candidate),
+        headline: section.title(),
+        body: section.narrationText(),
+        secondaryText: section.secondaryText ? section.secondaryText() : null,
+        closingText: section.closingText ? section.closingText() : null,
+        wordTimestamps: section.wordTimestamps,
+      };
+      if (screenKey === 'topEmployer') resolved.badges = topEmployerBadges;
       return [screenKey, resolved];
     })
   );
@@ -62,33 +41,33 @@ export function buildScreens(candidate) {
 
 export const benefits = [
   {
-    title: 'Bienestar emocional',
-    body: 'Flexibilidad, conciliación y reconocimiento para ayudarte a dar lo mejor de ti.',
+    title: 'Cuidamos de las personas',
+    body: 'Flexibilidad, conciliación, apoyo emocional y una experiencia pensada para ayudarte a dar lo mejor de ti.',
     icon: 'emotional',
   },
   {
-    title: 'Bienestar financiero',
-    body: 'Optimiza tu compensación, favorece el ahorro y te protege ante los imprevistos.',
+    title: 'Más tranquilidad para tu día a día',
+    body: 'Beneficios para optimizar tu compensación, favorecer el ahorro y protegerte en diferentes momentos vitales.',
     icon: 'financial',
   },
   {
-    title: 'Desarrollo y aprendizaje',
-    body: 'Formación continua y nuevas oportunidades para desarrollar tu carrera.',
+    title: 'Crece a tu manera',
+    body: 'Formación, aprendizaje continuo y oportunidades para desarrollar nuevas capacidades a lo largo de tu carrera.',
     icon: 'growth',
   },
   {
-    title: 'Bienestar físico',
-    body: 'Salud, actividad física y prevención para ayudarte a cuidarte cada día.',
+    title: 'Tu salud también es importante',
+    body: 'Programas de salud, prevención y actividad física para ayudarte a mantener hábitos saludables.',
     icon: 'physical',
   },
   {
-    title: 'Impacto y compromiso',
-    body: 'Participa en iniciativas sociales, medioambientales y de voluntariado con impacto real.',
+    title: 'Contribuye a algo más grande',
+    body: 'Iniciativas sociales, medioambientales y de voluntariado con impacto dentro y fuera de la compañía.',
     icon: 'impact',
   },
   {
-    title: 'Ventajas y descuentos',
-    body: 'Acceso a descuentos, acuerdos y ventajas exclusivas para profesionales de Indra Group.',
+    title: 'Beneficios para cada día',
+    body: 'Descuentos, acuerdos y ventajas exclusivas para profesionales de Indra Group.',
     icon: 'perks',
   },
 ];
@@ -96,26 +75,28 @@ export const benefits = [
 export const reasons = [
   {
     title: 'Impulsamos el desarrollo profesional',
-    body: 'Creamos oportunidades para aprender, evolucionar y construir una carrera con impacto.',
+    body: 'Oportunidades para evolucionar y construir una carrera con impacto.',
   },
   {
     title: 'Apostamos por el aprendizaje continuo',
-    body: 'Facilitamos el acceso a formación, conocimiento y nuevas experiencias de desarrollo.',
+    body: 'Acceso a formación, conocimiento y nuevas experiencias.',
   },
   {
     title: 'Crecemos en un entorno diverso e inclusivo',
-    body: 'Una cultura donde cada persona puede aportar, crecer y sentirse parte del equipo.',
+    body: 'Una cultura donde cada persona puede aportar, desarrollarse y sentirse parte.',
   },
   {
     title: 'Ponemos a las personas en el centro',
-    body: 'Una experiencia de empleado basada en la escucha, el bienestar y la flexibilidad.',
+    body: 'Una experiencia basada en la escucha, el bienestar y la flexibilidad.',
   },
   {
     title: 'Innovación, tecnología e impacto real',
-    body: 'Participa en proyectos que transforman sectores clave y contribuyen a construir el futuro.',
+    body: 'Proyectos que transforman sectores clave y contribuyen a construir el futuro.',
   },
 ];
 
+// Pending validation by Marketing — figures/labels below, not the section
+// copy or narration, which are final per the content brief.
 export const sectors = [
   {
     stat: '+20.500 M€',

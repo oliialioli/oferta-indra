@@ -57,7 +57,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
   }, []);
 
   const section = modalOpen ? confirmationSection : narratorSections[activeIndex] ?? narratorSections[0];
-  const message = section.message();
+  const narrationText = section.narrationText();
   const hasAudio = Boolean(section.audioSrc);
 
   const clearTimers = useCallback(() => {
@@ -272,7 +272,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
 
   return {
     state,
-    message,
+    narrationText,
     sectionId: section.id,
     hasAudio,
     audioRef,

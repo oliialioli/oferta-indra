@@ -5,7 +5,7 @@ import TypewriterHeadline from './TypewriterHeadline';
 import NarratedText from './NarratedText';
 import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
 
-const taglineSx = {
+const closingTextSx = {
   fontSize: { xs: 'clamp(13px, 3.5vw, 15px)', md: 'clamp(15px, 2.1vw, 22px)' },
   lineHeight: 1.4,
   fontStyle: 'italic',
@@ -13,30 +13,50 @@ const taglineSx = {
   margin: 0,
 };
 
+const secondaryTextSx = {
+  fontSize: { xs: 'clamp(14px, 3.6vw, 16px)', md: 'clamp(13px, 1.7vw, 17px)' },
+  lineHeight: 1.5,
+  color: colors.grisAcero,
+  margin: 0,
+};
+
+// Karaoke text needs more presence than an auxiliary line but stays under
+// the title — see the content brief's visual hierarchy: legible, a step
+// down from the headline, generous line-height, never competing with the
+// cards/data below it.
 const bodyTextSx = {
   fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 'clamp(15px, 2.1vw, 22px)' },
   lineHeight: { xs: 1.5, md: 1.4 },
-  color: colors.blanco,
+  maxWidth: '58ch',
 };
 
 const Screen = forwardRef(function Screen(
   {
-    eyebrow,
-    greeting,
+    eyebrowLines,
     headline,
     headlineVariant = 'section',
     body,
     narrated,
-    tagline,
-    taglinePosition = 'body',
+    wordTimestamps,
+    secondaryText,
+    closingText,
+    closingPosition = 'body',
     badges,
     revealed,
     children,
   },
   ref
 ) {
-  const paragraphs = Array.isArray(body) ? body : body ? [body] : [];
-  const taglineNode = tagline && <Typography sx={taglineSx}>{tagline}</Typography>;
+  const closingNode = closingText && closingText.length > 0 && (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      {closingText.map((line, i) => (
+        <Typography key={i} sx={closingTextSx}>
+          {line}
+        </Typography>
+      ))}
+    </Box>
+  );
+
   return (
     <Box
       ref={ref}
@@ -61,50 +81,42 @@ const Screen = forwardRef(function Screen(
           transition: 'opacity .5s cubic-bezier(.2,.8,.2,1), transform .5s cubic-bezier(.2,.8,.2,1)',
         }}
       >
-        <Typography
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            fontSize: 'clamp(13px, 1.65vw, 17px)',
-            color: colors.grisAcero,
-            margin: 0,
-          }}
-        >
-          {eyebrow}
-        </Typography>
-
-        {greeting && (
-          <Typography
-            sx={{
-              fontSize: { xs: 'clamp(16px, 4vw, 18px)', md: 'clamp(16px, 1.8vw, 20px)' },
-              color: colors.grisAcero,
-              margin: 0,
-            }}
-          >
-            {greeting}
-          </Typography>
+        {eyebrowLines && eyebrowLines.length > 0 && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {eyebrowLines.map((line, i) => (
+              <Typography
+                key={i}
+                sx={{
+                  fontSize: 'clamp(13px, 1.65vw, 17px)',
+                  color: colors.grisAcero,
+                  margin: 0,
+                }}
+              >
+                {line}
+              </Typography>
+            ))}
+          </Box>
         )}
 
         <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
 
-        {paragraphs.map((paragraph, i) =>
-          narrated ? (
-            <NarratedText
-              key={i}
-              text={paragraph}
-              audioRef={narrated.audioRef}
-              active={narrated.active}
-              ended={narrated.ended}
-              revealSeq={narrated.revealSeq}
-              sx={bodyTextSx}
-            />
-          ) : (
-            <Typography key={i} sx={{ ...bodyTextSx, margin: 0 }}>
-              {paragraph}
-            </Typography>
-          )
+        {narrated ? (
+          <NarratedText
+            text={body}
+            audioRef={narrated.audioRef}
+            active={narrated.active}
+            ended={narrated.ended}
+            revealSeq={narrated.revealSeq}
+            wordTimestamps={wordTimestamps}
+            sx={bodyTextSx}
+          />
+        ) : (
+          <Typography sx={{ ...bodyTextSx, color: colors.blanco, margin: 0 }}>{body}</Typography>
         )}
 
-        {taglinePosition === 'body' && taglineNode}
+        {secondaryText && <Typography sx={secondaryTextSx}>{secondaryText}</Typography>}
+
+        {closingPosition === 'body' && closingNode}
       </Box>
 
       <Box
@@ -120,7 +132,7 @@ const Screen = forwardRef(function Screen(
         }}
       >
         {children}
-        {taglinePosition === 'after-children' && taglineNode}
+        {closingPosition === 'after-children' && closingNode}
       </Box>
     </Box>
   );

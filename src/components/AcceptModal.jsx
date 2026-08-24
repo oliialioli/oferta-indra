@@ -4,10 +4,13 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { colors } from '../theme/theme';
 import { cornerStyles } from './OfferButton';
+import { confirmationSection } from '../data/narratorConfig';
 import avatarSmall from '../assets/images/buddy-avatar-small.png';
 
 export default function AcceptModal({ open, onClose, candidateName = 'Raquel', slug }) {
   const downloadUrl = slug ? `/api/offers/${encodeURIComponent(slug)}/document` : null;
+  const [eyebrowLine] = confirmationSection.eyebrowLines({ name: candidateName });
+
   return (
     <Dialog
       open={open}
@@ -30,16 +33,21 @@ export default function AcceptModal({ open, onClose, candidateName = 'Raquel', s
         alt={`Buddy, el asistente virtual de Indra Group`}
         sx={{ width: 64, height: 84, objectFit: 'cover', margin: '0 auto 14px', borderRadius: '8px' }}
       />
+      <Typography sx={{ fontSize: 12, letterSpacing: '0.03em', color: '#8b8b7e', margin: '0 0 6px' }}>
+        {eyebrowLine}
+      </Typography>
       <Typography
         id="accept-modal-title"
         component="h2"
         sx={{ fontSize: 22, margin: '0 0 10px', color: colors.azulOscuro, fontWeight: 400 }}
       >
-        Descarga y firma la aceptación
+        {confirmationSection.title()}
       </Typography>
-      <Typography sx={{ fontSize: '11pt', lineHeight: 1.4, color: '#646459', margin: '0 0 22px' }}>
-        Descarga la aceptación, fírmala y responde al email con la aceptación firmada.
-        ¡Gracias por unirte a nuestro equipo, {candidateName}!
+      <Typography sx={{ fontSize: '11pt', lineHeight: 1.4, color: '#646459', margin: '0 0 14px' }}>
+        {confirmationSection.narrationText()}
+      </Typography>
+      <Typography sx={{ fontSize: '10pt', lineHeight: 1.4, color: '#646459', margin: '0 0 22px' }}>
+        {confirmationSection.instructionsText()}
       </Typography>
       <Button
         component={downloadUrl ? 'a' : 'button'}
@@ -62,6 +70,11 @@ export default function AcceptModal({ open, onClose, candidateName = 'Raquel', s
       >
         Descargar y firmar aceptación
       </Button>
+      {confirmationSection.closingText().map((line) => (
+        <Typography key={line} sx={{ fontSize: '9.5pt', fontStyle: 'italic', color: '#8b8b7e', margin: '14px 0 0' }}>
+          {line}
+        </Typography>
+      ))}
     </Dialog>
   );
 }

@@ -60,7 +60,7 @@ export default function App({ slug }) {
 
   return (
     <>
-      <Header roleLabel={screens.intro.eyebrow} sectionLabel={sectionLabel} progressPct={progressPct} />
+      <Header roleLabel={candidate.role} sectionLabel={sectionLabel} progressPct={progressPct} />
 
       <Box sx={{ position: 'relative' }}>
         <AvatarNarrator avatarName={candidate.avatarName} narrator={narrator} />
@@ -80,23 +80,25 @@ export default function App({ slug }) {
           <Screen
             ref={register}
             revealed={revealed.has(0)}
-            eyebrow={screens.intro.eyebrow}
-            greeting={screens.intro.greeting}
+            eyebrowLines={screens.intro.eyebrowLines}
             headline={screens.intro.headline}
             headlineVariant="hero"
             body={screens.intro.body}
             narrated={narratedFor(0)}
-            tagline={screens.intro.tagline}
+            wordTimestamps={screens.intro.wordTimestamps}
+            secondaryText={screens.intro.secondaryText}
+            closingText={screens.intro.closingText}
           />
 
           {/* Screen 2 — Offer details */}
           <Screen
             ref={register}
             revealed={revealed.has(1)}
-            eyebrow={screens.details.eyebrow}
+            eyebrowLines={screens.details.eyebrowLines}
             headline={screens.details.headline}
             body={screens.details.body}
             narrated={narratedFor(1)}
+            wordTimestamps={screens.details.wordTimestamps}
           >
             <StatGrid stats={stats} />
           </Screen>
@@ -105,10 +107,11 @@ export default function App({ slug }) {
           <Screen
             ref={register}
             revealed={revealed.has(2)}
-            eyebrow={screens.benefits.eyebrow}
+            eyebrowLines={screens.benefits.eyebrowLines}
             headline={screens.benefits.headline}
             body={screens.benefits.body}
             narrated={narratedFor(2)}
+            wordTimestamps={screens.benefits.wordTimestamps}
           >
             <BenefitsGrid benefits={benefits} />
           </Screen>
@@ -117,13 +120,14 @@ export default function App({ slug }) {
           <Screen
             ref={register}
             revealed={revealed.has(3)}
-            eyebrow={screens.topEmployer.eyebrow}
+            eyebrowLines={screens.topEmployer.eyebrowLines}
             headline={screens.topEmployer.headline}
             body={screens.topEmployer.body}
             narrated={narratedFor(3)}
+            wordTimestamps={screens.topEmployer.wordTimestamps}
             badges={screens.topEmployer.badges}
-            tagline={screens.topEmployer.tagline}
-            taglinePosition="after-children"
+            closingText={screens.topEmployer.closingText}
+            closingPosition="after-children"
           >
             <ReasonsList reasons={reasons} />
           </Screen>
@@ -132,10 +136,11 @@ export default function App({ slug }) {
           <Screen
             ref={register}
             revealed={revealed.has(4)}
-            eyebrow={screens.sectors.eyebrow}
+            eyebrowLines={screens.sectors.eyebrowLines}
             headline={screens.sectors.headline}
             body={screens.sectors.body}
             narrated={narratedFor(4)}
+            wordTimestamps={screens.sectors.wordTimestamps}
           >
             <SectorsGrid sectors={sectors} />
           </Screen>
