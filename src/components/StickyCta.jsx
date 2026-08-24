@@ -21,8 +21,9 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           of scrolling rather than a separate destination — a giant
           always-on "Revisar y aceptar oferta" button here was pulling every
           click before people scrolled or used the section's own buttons.
-          The accept action stays reachable via a quiet text link on the
-          left, for anyone who deliberately wants to skip ahead. */}
+          The accept action stays reachable via a quiet text link, grouped
+          together with "Siguiente" on the right, for anyone who
+          deliberately wants to skip ahead. */}
       <Box
         sx={{
           display: { xs: 'none', md: 'flex' },
@@ -32,7 +33,7 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           bottom: 0,
           zIndex: 80,
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           gap: '24px',
           padding: '18px clamp(20px, 2.11vw, 40px)',
           background: 'rgba(0,25,34,0.85)',
@@ -40,12 +41,10 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {!isLast ? (
+        {!isLast && (
           <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta">
             Aceptar oferta
           </OfferButton>
-        ) : (
-          <span />
         )}
 
         {!isLast ? (
