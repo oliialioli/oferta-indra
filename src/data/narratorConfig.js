@@ -27,7 +27,7 @@ export const TOP_EMPLOYER_YEAR = '2026';
 export const narratorSections = [
   {
     id: 'intro',
-    eyebrowLines: (candidate) => [`PROPUESTA PARA ${candidate.name.toUpperCase()}`, candidate.role.toUpperCase()],
+    eyebrowLines: (candidate) => [`PROPUESTA PARA ${candidate.name.toUpperCase()}`],
     title: () => 'Tu próxima misión puede comenzar aquí.',
     narrationText: () =>
       '¡Hola! Te damos la bienvenida. En este espacio podrás conocer tu propuesta y descubrir todo lo que Indra Group pone a tu disposición para crecer, aprender y generar un impacto real.',

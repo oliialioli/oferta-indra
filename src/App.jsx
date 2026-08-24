@@ -101,6 +101,7 @@ export default function App({ slug }) {
             ref={register}
             revealed={revealed.has(0)}
             eyebrowLines={screens.intro.eyebrowLines}
+            roleHighlight={candidate.role.toUpperCase()}
             headline={screens.intro.headline}
             headlineVariant="hero"
             body={screens.intro.body}

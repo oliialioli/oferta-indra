@@ -13,6 +13,18 @@ const closingTextSx = {
   margin: 0,
 };
 
+// The intro screen's role line: still an eyebrow-style all-caps label
+// (consistent with the other screens' single-line eyebrows), but with
+// more size/weight/contrast than the personalized greeting above it —
+// it's the one fact from this block worth a second glance.
+const roleHighlightSx = {
+  fontSize: 'clamp(17px, 2.4vw, 24px)',
+  fontWeight: 500,
+  letterSpacing: '0.01em',
+  color: colors.blanco,
+  margin: 0,
+};
+
 const secondaryTextSx = {
   fontSize: { xs: 'clamp(14px, 3.6vw, 16px)', md: 'clamp(13px, 1.7vw, 17px)' },
   lineHeight: 1.5,
@@ -41,6 +53,7 @@ const bodyTextSx = {
 const Screen = forwardRef(function Screen(
   {
     eyebrowLines,
+    roleHighlight,
     headline,
     headlineVariant = 'section',
     body,
@@ -106,6 +119,8 @@ const Screen = forwardRef(function Screen(
             ))}
           </Box>
         )}
+
+        {roleHighlight && <Typography sx={roleHighlightSx}>{roleHighlight}</Typography>}
 
         <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
 
