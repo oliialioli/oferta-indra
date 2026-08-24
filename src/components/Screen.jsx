@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TypewriterHeadline from './TypewriterHeadline';
 import NarratedText from './NarratedText';
 import AudioInviteCard from './AudioInviteCard';
@@ -11,18 +12,6 @@ const closingTextSx = {
   lineHeight: 1.4,
   fontStyle: 'italic',
   color: colors.grisAcero,
-  margin: 0,
-};
-
-// The intro screen's role line: still an eyebrow-style all-caps label
-// (consistent with the other screens' single-line eyebrows), but with
-// more size/weight/contrast than the personalized greeting above it —
-// it's the one fact from this block worth a second glance.
-const roleHighlightSx = {
-  fontSize: 'clamp(17px, 2.4vw, 24px)',
-  fontWeight: 500,
-  letterSpacing: '0.01em',
-  color: colors.blanco,
   margin: 0,
 };
 
@@ -54,7 +43,6 @@ const bodyTextSx = {
 const Screen = forwardRef(function Screen(
   {
     eyebrowLines,
-    roleHighlight,
     headline,
     headlineVariant = 'section',
     body,
@@ -122,8 +110,6 @@ const Screen = forwardRef(function Screen(
           </Box>
         )}
 
-        {roleHighlight && <Typography sx={roleHighlightSx}>{roleHighlight}</Typography>}
-
         <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
 
         {audioInvite?.show ? (
@@ -142,7 +128,12 @@ const Screen = forwardRef(function Screen(
           <Typography sx={{ ...bodyTextSx, color: colors.blanco, margin: 0 }}>{body}</Typography>
         )}
 
-        {secondaryText && <Typography sx={secondaryTextSx}>{secondaryText}</Typography>}
+        {secondaryText && (
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <InfoOutlinedIcon sx={{ fontSize: 16, color: colors.grisAcero, marginTop: '2px', flex: 'none' }} />
+            <Typography sx={secondaryTextSx}>{secondaryText}</Typography>
+          </Box>
+        )}
         {expiryNotice && <Typography sx={expiryNoticeSx}>{expiryNotice}</Typography>}
 
         {closingPosition === 'body' && closingNode}
