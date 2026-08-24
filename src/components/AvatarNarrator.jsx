@@ -254,8 +254,24 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
     // elements. Flipping the opacity crossfade before this layer actually
     // has a frame ready to paint showed as a brief flash of the character
     // box's own background (a dark blue) instead of a clean dissolve
-    // between the two clips.
-    if (el.readyState >= 2) {
+    // between the two clips — readyState/'loadeddata' alone turned out not
+    // to be a precise enough signal for "there's really something to see
+    // now" (they mean "a frame is decoded", not "a frame has been
+    // composited to the screen"); requestVideoFrameCallback is the API
+    // built specifically for that distinction, so it's used whenever the
+    // browser supports it (all major engines as of a couple years ago),
+    // falling back to the readyState/loadeddata approach otherwise.
+    if (typeof el.requestVideoFrameCallback === 'function') {
+      let flipped = false;
+      const flipOnce = () => {
+        if (flipped) return;
+        flipped = true;
+        doFlip();
+      };
+      el.requestVideoFrameCallback(flipOnce);
+      // Still don't let it hang indefinitely if the callback never fires.
+      window.setTimeout(flipOnce, 300);
+    } else if (el.readyState >= 2) {
       requestAnimationFrame(doFlip);
     } else {
       let flipped = false;
