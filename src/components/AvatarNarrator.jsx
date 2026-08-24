@@ -234,7 +234,7 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
     const p = el.play();
     if (p?.catch) p.catch(() => {});
 
-    requestAnimationFrame(() => {
+    const doFlip = () => {
       frontRef.current = backKey;
       setFrontLayer(backKey);
       window.setTimeout(() => {
@@ -246,7 +246,30 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
           videoRefs[frontKey].current?.pause();
         }
       }, CROSSFADE_MS + 60);
-    });
+    };
+
+    // Setting a new src always starts a fresh decode for THIS element, even
+    // when the browser already has the bytes cached from the upfront
+    // <link rel="preload"> below — decoded frames aren't shared across
+    // elements. Flipping the opacity crossfade before this layer actually
+    // has a frame ready to paint showed as a brief flash of the character
+    // box's own background (a dark blue) instead of a clean dissolve
+    // between the two clips.
+    if (el.readyState >= 2) {
+      requestAnimationFrame(doFlip);
+    } else {
+      let flipped = false;
+      const onReady = () => {
+        if (flipped) return;
+        flipped = true;
+        el.removeEventListener('loadeddata', onReady);
+        requestAnimationFrame(doFlip);
+      };
+      el.addEventListener('loadeddata', onReady);
+      // Don't let the crossfade hang indefinitely if loadeddata is slow
+      // to fire (e.g. a throttled connection despite the preload hint).
+      window.setTimeout(onReady, 250);
+    }
     // videoRefs is a stable map of refs across renders; safe to omit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -300,6 +323,34 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
     // front, with a fresh "armed" guard for the next cycle.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, frontLayer, swapLayer]);
+
+  // One-shot clips (presenting/confirmation/greeting) used to wait for the
+  // native 'ended' event before crossfading into whatever comes next — by
+  // then the clip's already sitting frozen on its last frame, so the
+  // dissolve blends two static frames instead of blending into motion,
+  // reading as a harder cut than the CROSSFADE_MS opacity fade alone can
+  // hide. Anticipating it slightly (same technique as the talking loop
+  // above) starts the handoff while the outgoing clip is still playing.
+  // handleVideoEnded is safely idempotent — it nulls onPresentingEndedRef
+  // after calling it, so the real 'ended' event firing moments later
+  // (browsers still fire it regardless of this) is just a no-op.
+  useEffect(() => {
+    if (state === 'talking' || LOOPING_STATES.has(state)) return undefined;
+    const el = videoRefs[frontRef.current].current;
+    if (!el) return undefined;
+    let armed = true;
+    const onTimeUpdate = () => {
+      if (!armed) return;
+      const remaining = el.duration - el.currentTime;
+      if (Number.isFinite(remaining) && remaining >= 0 && remaining <= 0.35) {
+        armed = false;
+        handleVideoEnded();
+      }
+    };
+    el.addEventListener('timeupdate', onTimeUpdate);
+    return () => el.removeEventListener('timeupdate', onTimeUpdate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, frontLayer, handleVideoEnded]);
 
   const handleEnded = useCallback(
     (e) => {

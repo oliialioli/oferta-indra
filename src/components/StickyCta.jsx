@@ -13,6 +13,10 @@ import { colors } from '../theme/theme';
 const SECTION_LABELS = ['Bienvenida', 'Tu propuesta', 'Beneficios', 'Top Employer', 'Sectores'];
 
 const compactButtonSx = { padding: { xs: '10px 14px', md: '11px 18px' }, fontSize: { xs: 14, md: 15 } };
+// The filled/primary button in the mobile bar grows to fill the row;
+// the outlined/secondary one stays sized to its own content — reads as
+// "this one's the expected action" without either fighting for space.
+const compactFillSx = { ...compactButtonSx, flex: 1 };
 
 export default function StickyCta({
   onAccept,
@@ -36,19 +40,24 @@ export default function StickyCta({
 
   // Initial focus on the choice itself when it first appears — screen
   // reader and keyboard users land somewhere meaningful rather than at the
-  // top of the page with no indication a decision is expected. Exactly one
-  // of these two refs is ever attached to a visible element at a time
-  // (desktop/mobile bars are CSS-hidden by breakpoint, not unmounted), and
-  // focusing a display:none element is a silent no-op, so trying both is
-  // safe — no visibility check needed. preventScroll avoids the jump
-  // scroll-into-view would otherwise cause on a page that's already
-  // scroll-locked (see App.jsx's useScrollLock).
-  const desktopPrimaryRef = useRef(null);
-  const mobilePrimaryRef = useRef(null);
+  // top of the page with no indication a decision is expected. Focuses the
+  // BAR ITSELF (tabIndex=-1), not the primary button directly — focusing
+  // the button triggers its own :focus-visible chamfer-corner styling even
+  // though nothing was actually clicked/tabbed to, making it look
+  // "pre-pressed" on a page nobody has touched yet. A plain container has
+  // no such style to misfire. Exactly one of these two refs is ever
+  // attached to a visible element at a time (desktop/mobile bars are
+  // CSS-hidden by breakpoint, not unmounted), and focusing a display:none
+  // element is a silent no-op, so trying both is safe — no visibility
+  // check needed. preventScroll avoids the jump scroll-into-view would
+  // otherwise cause on a page that's already scroll-locked (see App.jsx's
+  // useScrollLock).
+  const desktopBarRef = useRef(null);
+  const mobileBarRef = useRef(null);
   useEffect(() => {
     if (!choosingAudio) return;
-    desktopPrimaryRef.current?.focus?.({ preventScroll: true });
-    mobilePrimaryRef.current?.focus?.({ preventScroll: true });
+    desktopBarRef.current?.focus?.({ preventScroll: true });
+    mobileBarRef.current?.focus?.({ preventScroll: true });
     // Only on the initial appearance of the choice, not every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -63,7 +72,6 @@ export default function StickyCta({
     );
     rightButton = (
       <OfferButton
-        ref={desktopPrimaryRef}
         onClick={onStartAudio}
         icon={<VolumeUpIcon />}
         aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
@@ -100,11 +108,10 @@ export default function StickyCta({
     );
     mobileRight = (
       <OfferButton
-        ref={mobilePrimaryRef}
         onClick={onStartAudio}
         icon={<VolumeUpIcon />}
         aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
-        sx={compactButtonSx}
+        sx={compactFillSx}
       >
         Comenzar con Buddy
       </OfferButton>
@@ -137,7 +144,7 @@ export default function StickyCta({
       </OfferButton>
     );
     mobileRight = (
-      <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label="Siguiente sección" sx={compactButtonSx}>
+      <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label="Siguiente sección" sx={compactFillSx}>
         Siguiente
       </OfferButton>
     );
@@ -154,6 +161,9 @@ export default function StickyCta({
           together with "Siguiente" on the right, for anyone who
           deliberately wants to skip ahead. */}
       <Box
+        ref={desktopBarRef}
+        tabIndex={-1}
+        {...(choosingAudio ? { role: 'group', 'aria-label': 'Elige cómo quieres comenzar: con o sin narración de audio' } : {})}
         sx={{
           display: { xs: 'none', md: 'flex' },
           position: 'fixed',
@@ -168,6 +178,7 @@ export default function StickyCta({
           background: 'rgba(0,25,34,0.85)',
           backdropFilter: 'blur(10px)',
           borderTop: '1px solid rgba(255,255,255,0.08)',
+          outline: 'none',
         }}
       >
         {leftButton}
@@ -179,6 +190,9 @@ export default function StickyCta({
           the last chapter is reached; the audio choice takes over both
           slots for as long as it hasn't been made. */}
       <Box
+        ref={mobileBarRef}
+        tabIndex={-1}
+        {...(choosingAudio ? { role: 'group', 'aria-label': 'Elige cómo quieres comenzar: con o sin narración de audio' } : {})}
         sx={{
           display: { xs: 'flex', md: 'none' },
           position: 'fixed',
@@ -196,6 +210,7 @@ export default function StickyCta({
           background: 'rgba(0,25,34,0.92)',
           backdropFilter: 'blur(10px)',
           borderTop: '1px solid rgba(255,255,255,0.1)',
+          outline: 'none',
         }}
       >
         {mobileLeft}
