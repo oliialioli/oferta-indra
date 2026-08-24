@@ -417,7 +417,12 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
   }
 
   const controls = hasAudio && (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+    // justifyContent: 'center' matters once audioEnabled — the primary
+    // button switches to width:'auto' and, with the mute IconButton fixed
+    // at 44px, the pair no longer fills this full-width row. Without
+    // centering, they'd pack to the left inside it while the character
+    // above stays centered, drifting the two apart on mobile.
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}>
       {primary && (
         <OfferButton
           variant="ghost"
