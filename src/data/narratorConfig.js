@@ -30,7 +30,7 @@ export const narratorSections = [
     eyebrowLines: (candidate) => [`PROPUESTA PARA ${candidate.name.toUpperCase()}`, candidate.role.toUpperCase()],
     title: () => 'Tu próxima misión puede comenzar aquí.',
     narrationText: () =>
-      'Te damos la bienvenida. En este espacio podrás conocer tu propuesta y descubrir todo lo que Indra Group pone a tu disposición para crecer, aprender y generar un impacto real.',
+      '¡Hola! Te damos la bienvenida. En este espacio podrás conocer tu propuesta y descubrir todo lo que Indra Group pone a tu disposición para crecer, aprender y generar un impacto real.',
     secondaryText: () => 'Aquí encontrarás toda la información necesaria para tomar tu decisión con confianza.',
     closingText: () => ['Together, One Mission.'],
     audioSrc: welcomeAudio,

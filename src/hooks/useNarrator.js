@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { narratorSections, confirmationSection } from '../data/narratorConfig';
 
 const SECTION_DEBOUNCE_MS = 220; // "stable presence in the viewport" before a section counts as active
-const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows before presenting/idle
+const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows before confirmation/idle
 
 // The narrator's single state machine: idle | presenting | talking |
 // listening | confirmation, plus a separate audioPhase that drives the
@@ -14,8 +14,9 @@ const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows bef
 // ~5s delay before the voice starts) and goes straight to TALKING in sync
 // with that section's real MP3; TALKING loops for as long as the audio
 // actually plays. When it ends, a brief "finished" beat shows, then
-// PRESENTING plays once (the character gesturing toward the content on the
-// right, inviting you to read it), then IDLE.
+// CONFIRMATION plays once (a nodding/acknowledging gesture — the same clip
+// used when the accept modal opens, see the modalOpen effect below), then
+// IDLE.
 export function useNarrator({ activeIndex, modalOpen }) {
   const [state, setState] = useState('idle');
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -216,7 +217,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
       const runId = runIdRef.current;
       schedule(() => {
         setJustFinished(false);
-        setState('presenting');
+        setState('confirmation');
         onPresentingEndedRef.current = () => {
           if (runIdRef.current !== runId) return;
           setState('idle');

@@ -418,7 +418,9 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
           icon={primary.icon}
           aria-label={primary.label}
           sx={{
-            padding: '10px 16px',
+            boxSizing: 'border-box',
+            height: 44,
+            padding: '0 16px',
             fontSize: 14,
             width: audioEnabled ? 'auto' : '100%',
             justifyContent: audioEnabled ? 'flex-start' : 'center',
@@ -432,11 +434,13 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
           onClick={toggleMute}
           aria-label={muted ? 'Activar volumen' : 'Silenciar volumen'}
           sx={{
+            boxSizing: 'border-box',
             color: colors.blanco,
             border: '1px solid rgba(255,255,255,0.3)',
             borderRadius: 0,
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
+            flex: 'none',
           }}
         >
           {muted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}

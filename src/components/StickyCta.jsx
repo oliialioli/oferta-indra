@@ -53,14 +53,15 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
             Siguiente: {nextLabel}
           </OfferButton>
         ) : (
-          <OfferButton onClick={onAccept} endIcon={<CheckIcon />} aria-label="Revisar y aceptar oferta de Indra Group">
-            Revisar y aceptar oferta
+          <OfferButton onClick={onAccept} endIcon={<CheckIcon />} aria-label="Descargar y aceptar la oferta de Indra Group">
+            Descargar y aceptar oferta
           </OfferButton>
         )}
       </Box>
 
-      {/* Mobile: unchanged — compact bar with section counter + "Siguiente",
-          becoming "Revisar oferta" only once the last chapter is reached. */}
+      {/* Mobile: unchanged layout — compact bar with section counter +
+          "Siguiente", becoming the download/accept action once the last
+          chapter is reached. */}
       <Box
         sx={{
           display: { xs: 'flex', md: 'none' },
@@ -90,10 +91,10 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
             variant="ghost"
             onClick={onAccept}
             endIcon={<CheckIcon />}
-            aria-label="Revisar y aceptar oferta de Indra Group"
+            aria-label="Descargar y aceptar la oferta de Indra Group"
             sx={{ padding: '10px 18px', fontSize: 14 }}
           >
-            Revisar oferta
+            Descargar oferta
           </OfferButton>
         ) : (
           <OfferButton
