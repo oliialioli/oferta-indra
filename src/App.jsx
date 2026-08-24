@@ -11,6 +11,7 @@ import SectorsGrid from './components/SectorsGrid';
 import StickyCta from './components/StickyCta';
 import AcceptModal from './components/AcceptModal';
 import { useRevealOnScroll } from './hooks/useRevealOnScroll';
+import { useNarrator } from './hooks/useNarrator';
 import { useOfferData } from './data/useOfferData';
 import { benefits, reasons, sectors } from './data/staticOfferData';
 import { colors } from './theme/theme';
@@ -21,12 +22,23 @@ export default function App({ slug }) {
   const { candidate, screens, stats, loading, error } = useOfferData(slug);
   const { register, revealed, activeIndex, scrollToNext } = useRevealOnScroll(SCREEN_COUNT);
   const [modalOpen, setModalOpen] = useState(false);
+  // Owned here (not inside AvatarNarrator) so the active Screen's own body
+  // text can be highlighted in sync with the same audio element/state —
+  // see NarratedText.jsx.
+  const narrator = useNarrator({ activeIndex, modalOpen });
 
   const progressPct = useMemo(
     () => Math.round((activeIndex / (SCREEN_COUNT - 1)) * 100),
     [activeIndex]
   );
   const sectionLabel = `${activeIndex + 1} de ${SCREEN_COUNT}`;
+
+  const narratedFor = (index) => ({
+    audioRef: narrator.audioRef,
+    active: activeIndex === index && (narrator.audioPhase === 'playing' || narrator.audioPhase === 'paused'),
+    ended: activeIndex === index && (narrator.audioPhase === 'ended' || narrator.audioPhase === 'error'),
+    revealSeq: narrator.revealSeq,
+  });
 
   if (loading) {
     return (
@@ -51,11 +63,7 @@ export default function App({ slug }) {
       <Header roleLabel={screens.intro.eyebrow} sectionLabel={sectionLabel} progressPct={progressPct} />
 
       <Box sx={{ position: 'relative' }}>
-        <AvatarNarrator
-          avatarName={candidate.avatarName}
-          activeIndex={activeIndex}
-          modalOpen={modalOpen}
-        />
+        <AvatarNarrator avatarName={candidate.avatarName} narrator={narrator} />
 
         <Box
           component="main"
@@ -73,9 +81,11 @@ export default function App({ slug }) {
             ref={register}
             revealed={revealed.has(0)}
             eyebrow={screens.intro.eyebrow}
+            greeting={screens.intro.greeting}
             headline={screens.intro.headline}
             headlineVariant="hero"
             body={screens.intro.body}
+            narrated={narratedFor(0)}
             tagline={screens.intro.tagline}
           />
 
@@ -86,6 +96,7 @@ export default function App({ slug }) {
             eyebrow={screens.details.eyebrow}
             headline={screens.details.headline}
             body={screens.details.body}
+            narrated={narratedFor(1)}
           >
             <StatGrid stats={stats} />
           </Screen>
@@ -97,6 +108,7 @@ export default function App({ slug }) {
             eyebrow={screens.benefits.eyebrow}
             headline={screens.benefits.headline}
             body={screens.benefits.body}
+            narrated={narratedFor(2)}
           >
             <BenefitsGrid benefits={benefits} />
           </Screen>
@@ -108,6 +120,7 @@ export default function App({ slug }) {
             eyebrow={screens.topEmployer.eyebrow}
             headline={screens.topEmployer.headline}
             body={screens.topEmployer.body}
+            narrated={narratedFor(3)}
             badges={screens.topEmployer.badges}
             tagline={screens.topEmployer.tagline}
             taglinePosition="after-children"
@@ -122,6 +135,7 @@ export default function App({ slug }) {
             eyebrow={screens.sectors.eyebrow}
             headline={screens.sectors.headline}
             body={screens.sectors.body}
+            narrated={narratedFor(4)}
           >
             <SectorsGrid sectors={sectors} />
           </Screen>

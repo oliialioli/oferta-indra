@@ -25,6 +25,21 @@ export function useNarrator({ activeIndex, modalOpen }) {
   const [revealSeq, setRevealSeq] = useState(0);
 
   const audioRef = useRef(null);
+  // useNarrator can now be called before the <audio> element it controls
+  // has actually mounted (App.jsx calls it unconditionally, including
+  // during useOfferData's loading state, before AvatarNarrator — and its
+  // <audio ref>  — exists). A plain useRef alone gives no signal for when
+  // that later mount happens, so the listener-attaching effect below would
+  // run once against a null ref and never get another chance. setAudioNode
+  // is the ref callback actually passed to the <audio> element; it updates
+  // audioRef.current (unchanged for every other consumer that just reads
+  // .current) and also flips this state so the effect re-runs once the
+  // node genuinely exists, whenever that turns out to be.
+  const [audioMounted, setAudioMounted] = useState(false);
+  const setAudioNode = useCallback((el) => {
+    audioRef.current = el;
+    setAudioMounted(Boolean(el));
+  }, []);
   const runIdRef = useRef(0);
   const timersRef = useRef([]);
   const debounceRef = useRef(null);
@@ -234,7 +249,8 @@ export function useNarrator({ activeIndex, modalOpen }) {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('error', onError);
     };
-  }, [schedule]);
+    // audioMounted intentionally included — see setAudioNode above.
+  }, [schedule, audioMounted]);
 
   // Tab hidden -> pause narration; tab visible again -> resume only if it
   // was actually playing before (never auto-starts audio on its own).
@@ -260,6 +276,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
     sectionId: section.id,
     hasAudio,
     audioRef,
+    setAudioNode,
     audioEnabled,
     audioPhase,
     justFinished,

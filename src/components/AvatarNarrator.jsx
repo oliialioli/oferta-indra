@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -10,14 +10,12 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import CheckIcon from '@mui/icons-material/Check';
 import OfferButton from './OfferButton';
 import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
-import { useNarrator } from '../hooks/useNarrator';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { NARRATOR_VIDEOS, LOOPING_STATES } from '../data/narratorVideos';
 import avatarPoster from '../assets/images/buddy-avatar-poster.png';
 
 const CROSSFADE_MS = 220;
 const LAYER_REF_KEYS = ['A', 'B'];
-const PENDING_WORD_COLOR = 'rgba(148, 163, 184, 0.55)';
 const CYAN = '#22D3EE';
 // Sampled directly from the character clips' own background — a hair off
 // colors.azulOscuro (#002532), close enough to pass unnoticed most of the
@@ -149,81 +147,20 @@ function SpeakingPill({ phase, reducedMotion }) {
   );
 }
 
-// The transcript sits directly on the page background (no card), always
-// fully legible. It only animates while genuinely narrating: spoken words
-// turn white as audio.currentTime advances past their proportional share
-// of audio.duration, pending words stay a muted blue-gray. Colors are
-// written straight to the DOM on 'timeupdate' (not via React state) so a
-// ~4x/sec event never triggers a full re-render.
-function TranscriptHighlight({ text, audioRef, active, ended, revealSeq }) {
-  const words = useMemo(() => text.split(' '), [text]);
-  const wordRefs = useRef([]);
-
-  const paint = useCallback(
-    (spokenCount) => {
-      wordRefs.current.forEach((el, i) => {
-        if (el) el.style.color = i < spokenCount ? colors.blanco : PENDING_WORD_COLOR;
-      });
-    },
-    []
-  );
-
-  useEffect(() => {
-    if (!active || ended) {
-      paint(words.length);
-      return undefined;
-    }
-    paint(0);
-    const audio = audioRef.current;
-    if (!audio) return undefined;
-    const onTimeUpdate = () => {
-      const d = audio.duration;
-      if (!Number.isFinite(d) || d <= 0) return;
-      const progress = Math.min(1, Math.max(0, audio.currentTime / d));
-      paint(Math.round(progress * words.length));
-    };
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    return () => audio.removeEventListener('timeupdate', onTimeUpdate);
-  }, [active, ended, words, audioRef, paint, revealSeq]);
-
-  return (
-    <Typography
-      sx={{
-        fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 14 },
-        lineHeight: { xs: 1.5, md: 1.6 },
-        margin: 0,
-      }}
-    >
-      {words.map((word, i) => (
-        <Box
-          key={i}
-          component="span"
-          ref={(el) => {
-            wordRefs.current[i] = el;
-          }}
-          sx={{ color: colors.blanco, transition: 'color .25s ease' }}
-        >
-          {word}
-          {i < words.length - 1 ? ' ' : ''}
-        </Box>
-      ))}
-    </Typography>
-  );
-}
-
 /**
- * The character + narration block, reused in two responsive slots (mobile
- * top bar + inline block, desktop fixed left column) but backed by ONE
- * useNarrator() state machine and ONE shared <audio> element so nothing
- * double-plays.
+ * The character + audio controls, reused in two responsive slots (mobile
+ * top bar + inline block, desktop fixed left column). The narrator's
+ * transcript used to live here too — it now narrates the section's own
+ * body text on the right (see NarratedText.jsx / Screen.jsx), so the
+ * `narrator` state machine is owned by App.jsx and passed down as a prop
+ * instead of being created here, letting both this component and the
+ * active Screen share the same audio element/state without double-playing.
  */
-export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, modalOpen }) {
-  const narrator = useNarrator({ activeIndex, modalOpen });
+export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
   const {
     state,
-    message,
     hasAudio,
-    audioRef,
+    setAudioNode,
     audioEnabled,
     audioPhase,
     justFinished,
@@ -234,7 +171,6 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
     replayAudio,
     toggleMute,
     handleVideoEnded,
-    revealSeq,
   } = narrator;
 
   const reducedMotion = usePrefersReducedMotion();
@@ -510,17 +446,7 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
   );
 
   const narratorBlock = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-      <TranscriptHighlight
-        text={message}
-        audioRef={audioRef}
-        active={audioPhase === 'playing' || audioPhase === 'paused'}
-        ended={audioPhase === 'ended' || audioPhase === 'error'}
-        revealSeq={revealSeq}
-      />
-
-      {controls}
-    </Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>{controls}</Box>
   );
 
   const showCompactBar = compactVisible && audioEnabled;
@@ -635,7 +561,7 @@ export default function AvatarNarrator({ avatarName = 'Buddy', activeIndex, moda
         )}
       </Box>
 
-      <Box component="audio" ref={audioRef} preload="none" sx={{ display: 'none' }} />
+      <Box component="audio" ref={setAudioNode} preload="none" sx={{ display: 'none' }} />
     </>
   );
 }

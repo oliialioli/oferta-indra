@@ -4,35 +4,35 @@
 // the API — see useOfferData.js) it stays a plain static module, imported
 // and bundled at build time exactly like before.
 //
-// `screenTemplates` used to be plain literal strings (offerData.js's old
-// `screens` object). Every screen except `intro` is still just static
-// copy — only `intro`'s headline/body actually mention the candidate, so
-// those two fields become small functions of `candidate` instead of
-// hardcoded text. `buildScreens(candidate)` resolves the whole set into
-// the exact same shape App.jsx has always rendered.
+// Each screen's `body` is now exactly the narrator's spoken script (see
+// narratorConfig.js) rather than separate marketing copy — the right-hand
+// body paragraph IS what's being narrated, highlighted word-by-word in
+// sync with the audio (see NarratedText.jsx), instead of duplicating a
+// transcript in a separate block under the avatar. Since the audio is a
+// fixed pre-recorded track, that text can never contain personal data —
+// `greeting` carries the one bit of personalization ("Hola, {name},") as
+// its own short line, rendered above the headline, never narrated/highlighted.
 
 import topEmployerSeal from '../assets/images/top-employer-seal.png';
 import linkedinTopCompaniesSeal from '../assets/images/linkedin-top-companies-seal.png';
+import { narratorSections } from './narratorConfig';
+
+const SECTION_ORDER = ['intro', 'details', 'benefits', 'topEmployer', 'sectors'];
 
 export const screenTemplates = {
   intro: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
-    headline: (candidate) => `¡Hola, ${candidate.name}! Tu próxima misión puede comenzar aquí.`,
-    body: (candidate) => [
-      `Aquí tienes todos los detalles de tu propuesta como ${candidate.role}: condiciones, beneficios y oportunidades en ${candidate.company}.`,
-      'Queremos que tengas toda la información para decidir con confianza, porque creemos en las personas que impulsan el cambio.',
-    ],
+    greeting: (candidate) => `Hola, ${candidate.name},`,
+    headline: () => 'Tu próxima misión puede comenzar aquí.',
     tagline: () => 'Together, One Mission.',
   },
   details: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
     headline: () => 'Tu propuesta para unirte a Indra Group',
-    body: () => 'El primer paso de una experiencia profesional para crecer, aprender y generar impacto real.',
   },
   benefits: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
     headline: () => 'Todo lo que ponemos a tu disposición para crecer y cuidarte',
-    body: () => 'Entendemos el bienestar de forma integral: desarrollo profesional, salud y seguridad financiera.',
   },
   topEmployer: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
@@ -41,23 +41,22 @@ export const screenTemplates = {
       { src: topEmployerSeal, alt: 'Sello Top Employer España 2026' },
       { src: linkedinTopCompaniesSeal, alt: 'Sello LinkedIn Top Companies España 2026' },
     ],
-    body: () => 'Reflejan nuestro compromiso con las personas: desarrollo, aprendizaje y oportunidades a largo plazo.',
     tagline: () => 'Together, One Mission.',
   },
   sectors: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
     headline: () => 'Tu talento puede ayudarnos a construir el futuro.',
-    body: () =>
-      'Formarás parte de una compañía tecnológica global que vive uno de sus momentos más relevantes, transformando sectores estratégicos.',
   },
 };
 
 export function buildScreens(candidate) {
   return Object.fromEntries(
-    Object.entries(screenTemplates).map(([screenKey, fields]) => [
-      screenKey,
-      Object.fromEntries(Object.entries(fields).map(([field, resolve]) => [field, resolve(candidate)])),
-    ])
+    SECTION_ORDER.map((screenKey, i) => {
+      const fields = screenTemplates[screenKey];
+      const resolved = Object.fromEntries(Object.entries(fields).map(([field, resolve]) => [field, resolve(candidate)]));
+      resolved.body = narratorSections[i].message();
+      return [screenKey, resolved];
+    })
   );
 }
 

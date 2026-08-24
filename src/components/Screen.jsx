@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TypewriterHeadline from './TypewriterHeadline';
+import NarratedText from './NarratedText';
 import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
 
 const taglineSx = {
@@ -12,12 +13,20 @@ const taglineSx = {
   margin: 0,
 };
 
+const bodyTextSx = {
+  fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 'clamp(15px, 2.1vw, 22px)' },
+  lineHeight: { xs: 1.5, md: 1.4 },
+  color: colors.blanco,
+};
+
 const Screen = forwardRef(function Screen(
   {
     eyebrow,
+    greeting,
     headline,
     headlineVariant = 'section',
     body,
+    narrated,
     tagline,
     taglinePosition = 'body',
     badges,
@@ -63,21 +72,37 @@ const Screen = forwardRef(function Screen(
           {eyebrow}
         </Typography>
 
-        <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
-
-        {paragraphs.map((paragraph, i) => (
+        {greeting && (
           <Typography
-            key={i}
             sx={{
-              fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 'clamp(15px, 2.1vw, 22px)' },
-              lineHeight: { xs: 1.5, md: 1.4 },
-              color: colors.blanco,
+              fontSize: { xs: 'clamp(16px, 4vw, 18px)', md: 'clamp(16px, 1.8vw, 20px)' },
+              color: colors.grisAcero,
               margin: 0,
             }}
           >
-            {paragraph}
+            {greeting}
           </Typography>
-        ))}
+        )}
+
+        <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
+
+        {paragraphs.map((paragraph, i) =>
+          narrated ? (
+            <NarratedText
+              key={i}
+              text={paragraph}
+              audioRef={narrated.audioRef}
+              active={narrated.active}
+              ended={narrated.ended}
+              revealSeq={narrated.revealSeq}
+              sx={bodyTextSx}
+            />
+          ) : (
+            <Typography key={i} sx={{ ...bodyTextSx, margin: 0 }}>
+              {paragraph}
+            </Typography>
+          )
+        )}
 
         {taglinePosition === 'body' && taglineNode}
       </Box>
