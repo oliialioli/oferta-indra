@@ -68,6 +68,7 @@ export default function App() {
             body={screens.intro.body}
             narrated={narratedFor(0)}
             wordTimestamps={screens.intro.wordTimestamps}
+            audioInvite={{ show: !narrator.audioDecided, onStart: narrator.enableAudio, onSkip: narrator.declineAudio }}
             secondaryText={screens.intro.secondaryText}
             closingText={screens.intro.closingText}
           />

@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TypewriterHeadline from './TypewriterHeadline';
 import NarratedText from './NarratedText';
+import AudioInviteCard from './AudioInviteCard';
 import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
 
 const closingTextSx = {
@@ -59,6 +60,7 @@ const Screen = forwardRef(function Screen(
     body,
     narrated,
     wordTimestamps,
+    audioInvite,
     secondaryText,
     expiryNotice,
     closingText,
@@ -124,7 +126,9 @@ const Screen = forwardRef(function Screen(
 
         <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
 
-        {narrated ? (
+        {audioInvite?.show ? (
+          <AudioInviteCard onStart={audioInvite.onStart} onSkip={audioInvite.onSkip} />
+        ) : narrated ? (
           <NarratedText
             text={body}
             audioRef={narrated.audioRef}
