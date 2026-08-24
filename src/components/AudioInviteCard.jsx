@@ -59,12 +59,12 @@ export default function AudioInviteCard({ onStart, onSkip }) {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: '6px', md: '14px' }, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: '6px', md: '10px' }, flexWrap: 'wrap' }}>
         <OfferButton
           onClick={onStart}
           icon={<VolumeUpIcon />}
           aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
-          sx={{ padding: { xs: '9px 12px', md: '16px 32px' }, fontSize: { xs: 13, md: 18 }, gap: { xs: '6px', md: 10 } }}
+          sx={{ padding: { xs: '9px 12px', md: '11px 18px' }, fontSize: { xs: 13, md: 15 }, gap: { xs: '6px', md: '8px' } }}
         >
           Comenzar con Buddy
         </OfferButton>
@@ -73,7 +73,7 @@ export default function AudioInviteCard({ onStart, onSkip }) {
           variant="ghost"
           onClick={onSkip}
           aria-label="Continuar sin narración de audio"
-          sx={{ padding: { xs: '9px 12px', md: '16px 32px' }, fontSize: { xs: 13, md: 18 } }}
+          sx={{ padding: { xs: '9px 12px', md: '11px 18px' }, fontSize: { xs: 13, md: 15 } }}
         >
           Ver sin audio
         </OfferButton>
