@@ -84,16 +84,26 @@ export default function OnboardingScreen({ candidate, expiryNotice, narrator }) 
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           alignItems: { xs: 'flex-start', md: 'center' },
-          gap: { xs: '24px', md: '56px' },
           padding: { xs: '24px 20px 0', md: '0 clamp(20px, 2.11vw, 40px)' },
           paddingBottom: 'calc(88px + env(safe-area-inset-bottom) + 32px)',
         }}
       >
-        <Box sx={{ display: 'flex', width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'center', md: 'flex-start' } }}>
+        {/* Same proportional left column as AvatarNarrator's fixed aside
+            (clamp(240px, 47vw, 900px)) so Buddy sits in the same place and
+            the text column starts at the same point, on any viewport width —
+            not just a small fixed gap that leaves a wide screen half-empty. */}
+        <Box
+          sx={{
+            display: 'flex',
+            width: { xs: '100%', md: 'clamp(240px, 47vw, 900px)' },
+            justifyContent: 'center',
+            marginBottom: { xs: '24px', md: 0 },
+          }}
+        >
           <OnboardingBuddy narrator={narrator} avatarName={candidate.avatarName} />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: '20px', md: '28px' }, maxWidth: 560 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: '20px', md: '28px' }, maxWidth: 775, paddingLeft: { md: 'clamp(8px, 1.2vw, 24px)' } }}>
           <Box>
             <Typography sx={{ fontSize: { xs: 13, md: 15 }, color: colors.grisAcero, margin: '0 0 6px' }}>
               TU PROPUESTA · {candidate.role.toUpperCase()}
