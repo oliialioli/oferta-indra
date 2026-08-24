@@ -162,6 +162,7 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
     hasAudio,
     setAudioNode,
     audioEnabled,
+    audioDecided,
     audioPhase,
     justFinished,
     muted,
@@ -397,7 +398,13 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
   let primary = null;
   if (hasAudio) {
     if (!audioEnabled) {
-      primary = { label: 'Activar audio', icon: <PlayArrowIcon />, onClick: enableAudio };
+      // Before the intro screen's AudioInviteCard has been answered, that
+      // card is the only way to start — a second "Activar audio" button
+      // here would just duplicate the same choice. Once answered (enabled
+      // or declined), this becomes the ongoing discreet way back in.
+      if (audioDecided) {
+        primary = { label: 'Activar audio', icon: <PlayArrowIcon />, onClick: enableAudio };
+      }
     } else if (audioPhase === 'playing') {
       primary = { label: 'Pausar audio', icon: <PauseIcon />, onClick: pauseAudio };
     } else if (audioPhase === 'paused') {

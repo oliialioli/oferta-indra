@@ -107,6 +107,7 @@ export default function App({ slug }) {
             body={screens.intro.body}
             narrated={narratedFor(0)}
             wordTimestamps={screens.intro.wordTimestamps}
+            audioInvite={{ show: !narrator.audioDecided, onStart: narrator.enableAudio, onSkip: narrator.declineAudio }}
             secondaryText={screens.intro.secondaryText}
             expiryNotice={expiryNotice}
             closingText={screens.intro.closingText}

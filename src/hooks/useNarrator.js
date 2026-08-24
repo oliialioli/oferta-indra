@@ -1,25 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { narratorSections, confirmationSection } from '../data/narratorConfig';
 
-const SECTION_DEBOUNCE_MS = 220; // "stable presence in the viewport" before a section counts as active
+const SECTION_DEBOUNCE_MS = 500; // let a section actually settle in view before its audio starts (~400-600ms)
 const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows before confirmation/idle
 
 // The narrator's single state machine: idle | presenting | talking |
 // listening | confirmation, plus a separate audioPhase that drives the
 // controls: inactive | playing | paused | ended | error.
 //
-// Rule of thumb: with audio OFF, entering a section plays PRESENTING once
-// and settles to IDLE — no talking, since there's nothing being said. With
-// audio ON, entering a section skips PRESENTING entirely (it would add a
-// ~5s delay before the voice starts) and goes straight to TALKING in sync
-// with that section's real MP3; TALKING loops for as long as the audio
-// actually plays. When it ends, a brief "finished" beat shows, then
+// Whether audio narrates at all is a one-time, explicit choice made on the
+// intro screen (see AudioInviteCard.jsx) — audioDecided tracks whether
+// that choice has been made yet at all, audioEnabled tracks which way it
+// went. Before the choice (or if declined), entering a section never plays
+// audio and Buddy just idles — no more per-section "presenting" gesture,
+// which used to fire regardless of whether the visitor had ever been
+// asked. Once enabled, entering a section plays straight into TALKING in
+// sync with that section's real MP3 (skipping PRESENTING, which would add
+// a ~5s delay before the voice starts); TALKING loops for as long as the
+// audio actually plays. When it ends, a brief "finished" beat shows, then
 // CONFIRMATION plays once (a nodding/acknowledging gesture — the same clip
 // used when the accept modal opens, see the modalOpen effect below), then
-// IDLE.
+// IDLE. Scrolling back to an already-heard section does not auto-replay
+// it (see heardSectionsRef) — only the manual "Volver a escuchar" control
+// does.
 export function useNarrator({ activeIndex, modalOpen }) {
   const [state, setState] = useState('idle');
   const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioDecided, setAudioDecided] = useState(false);
   const [audioPhase, setAudioPhase] = useState('inactive');
   const [justFinished, setJustFinished] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -41,6 +48,9 @@ export function useNarrator({ activeIndex, modalOpen }) {
     audioRef.current = el;
     setAudioMounted(Boolean(el));
   }, []);
+  // Section ids that have already auto-played once — scrolling back to one
+  // of these doesn't restart its audio; only the manual replay control does.
+  const heardSectionsRef = useRef(new Set());
   const runIdRef = useRef(0);
   const timersRef = useRef([]);
   const debounceRef = useRef(null);
@@ -79,6 +89,17 @@ export function useNarrator({ activeIndex, modalOpen }) {
     if (audio && !audio.paused) audio.pause();
   }, []);
 
+  // The browser fires 'pause' as a queued task, not synchronously — see
+  // onPause below, which already defers its own state update by one more
+  // tick to let a same-tick 'ended' win first. cancelAll's own stopAudio()
+  // races that same queued event: if the section entry that follows sets
+  // state to e.g. 'ended' (re-entering an already-heard section) or
+  // 'confirmation' (opening the accept modal), the *later* 'pause' event
+  // would otherwise clobber it back to 'paused' a tick afterward. Flagging
+  // "this pause is our own section-transition cleanup, not a user click on
+  // Pausar audio" lets onPause skip its update for exactly that one event.
+  const skipNextPauseEventRef = useRef(false);
+
   // Fully cancels whatever the previous section left running — pending
   // timers, the presenting->idle handoff, and any audio — before a new
   // section (or a manual control) takes over.
@@ -87,6 +108,7 @@ export function useNarrator({ activeIndex, modalOpen }) {
     clearTimers();
     onPresentingEndedRef.current = null;
     setJustFinished(false);
+    if (audioRef.current && !audioRef.current.paused) skipNextPauseEventRef.current = true;
     stopAudio();
   }, [clearTimers, stopAudio]);
 
@@ -102,17 +124,25 @@ export function useNarrator({ activeIndex, modalOpen }) {
   }, []);
 
   const runSectionEntry = useCallback(
-    (sec, runId) => {
+    (sec) => {
       if (audioEnabled && sec.audioSrc) {
+        if (heardSectionsRef.current.has(sec.id)) {
+          // Already played once on a previous visit to this section —
+          // don't auto-replay on scrolling back, just surface the manual
+          // "Volver a escuchar" control (same one shown after a section
+          // finishes naturally).
+          setAudioPhase('ended');
+          setState('idle');
+          return;
+        }
+        heardSectionsRef.current.add(sec.id);
         playSectionAudio(sec);
         return;
       }
+      // No audio yet decided, declined, or this section has none —
+      // Buddy just idles, no per-section gesture.
       setAudioPhase('inactive');
-      setState('presenting');
-      onPresentingEndedRef.current = () => {
-        if (runIdRef.current !== runId) return;
-        setState('idle');
-      };
+      setState('idle');
     },
     [audioEnabled, playSectionAudio]
   );
@@ -127,16 +157,16 @@ export function useNarrator({ activeIndex, modalOpen }) {
       if (activeIndex === lastEnteredIndexRef.current) return;
       lastEnteredIndexRef.current = activeIndex;
       cancelAll();
-      const runId = runIdRef.current;
       const sec = narratorSections[activeIndex] ?? narratorSections[0];
       if (isFirstEntryRef.current) {
-        // Never autoplay anything (video or audio) on first load.
+        // Never autoplay anything (video or audio) on first load — the
+        // intro screen's own AudioInviteCard is what makes that call.
         isFirstEntryRef.current = false;
         setState('idle');
         setAudioPhase('inactive');
         return;
       }
-      runSectionEntry(sec, runId);
+      runSectionEntry(sec);
     }, SECTION_DEBOUNCE_MS);
     return () => clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,10 +195,19 @@ export function useNarrator({ activeIndex, modalOpen }) {
 
   const enableAudio = useCallback(() => {
     setAudioEnabled(true);
+    setAudioDecided(true);
     cancelAll();
     lastEnteredIndexRef.current = activeIndex;
+    heardSectionsRef.current.add(section.id);
     playSectionAudio(section);
   }, [cancelAll, playSectionAudio, section, activeIndex]);
+
+  // "Ver sin audio" on the intro screen's invite card — audio stays off,
+  // Buddy idles for the rest of the tour, and the choice is never asked
+  // again (the invite card itself only shows while !audioDecided).
+  const declineAudio = useCallback(() => {
+    setAudioDecided(true);
+  }, []);
 
   const pauseAudio = useCallback(() => {
     stopAudio();
@@ -225,6 +264,10 @@ export function useNarrator({ activeIndex, modalOpen }) {
       }, FINISHED_HOLD_MS);
     };
     const onPause = () => {
+      if (skipNextPauseEventRef.current) {
+        skipNextPauseEventRef.current = false;
+        return;
+      }
       // A natural finish fires 'pause' then 'ended' (order varies by
       // browser) — defer one tick so 'ended' has a chance to claim it
       // first; otherwise this would flash IDLE/paused before the real
@@ -279,10 +322,12 @@ export function useNarrator({ activeIndex, modalOpen }) {
     audioRef,
     setAudioNode,
     audioEnabled,
+    audioDecided,
     audioPhase,
     justFinished,
     muted,
     enableAudio,
+    declineAudio,
     pauseAudio,
     resumeAudio,
     replayAudio,
