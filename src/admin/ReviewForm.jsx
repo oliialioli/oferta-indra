@@ -7,13 +7,19 @@ import Paper from '@mui/material/Paper';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import LinkIcon from '@mui/icons-material/Link';
-import { createOffer, updateOffer } from './adminApi';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import { createOffer, updateOffer, sendOfferEmail } from './adminApi';
 
 function extractionToFields(extraction) {
   return {
     candidateFullName: extraction.candidateFullName.value || '',
     candidateFirstName: extraction.candidateFirstName.value || '',
+    candidateEmail: '',
     role: '',
     fechaIncorporacion: extraction.fechaIncorporacion.value || '',
     tipoContrato: extraction.tipoContrato.value || '',
@@ -31,6 +37,7 @@ function offerToFields(offer) {
   return {
     candidateFullName: offer.letter.candidateFullName || '',
     candidateFirstName: offer.letter.candidateFirstName || '',
+    candidateEmail: offer.letter.candidateEmail || '',
     role: offer.display.role || '',
     fechaIncorporacion: offer.letter.fechaIncorporacion || '',
     tipoContrato: offer.letter.tipoContrato || '',
@@ -51,6 +58,7 @@ function fieldsToPayload(fields, sourceDocBlobUrl) {
     letter: {
       candidateFullName: fields.candidateFullName,
       candidateFirstName: fields.candidateFirstName,
+      candidateEmail: fields.candidateEmail,
       fechaIncorporacion: fields.fechaIncorporacion,
       tipoContrato: fields.tipoContrato,
       convenioColectivo: fields.convenioColectivo,
@@ -113,8 +121,13 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
   const [publishedUrl, setPublishedUrl] = useState(
     offer?.status === 'published' ? `${window.location.origin}/oferta/${offer.slug}` : null
   );
+  const [emailSentAt, setEmailSentAt] = useState(offer?.emailSentAt || null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  const [confirmEmailOpen, setConfirmEmailOpen] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailError, setEmailError] = useState(null);
 
   const confidenceFor = (key) => (!isEditing && extraction ? extraction[key]?.confidence : undefined);
 
@@ -145,6 +158,20 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
     }
   };
 
+  const confirmSendEmail = async () => {
+    setSendingEmail(true);
+    setEmailError(null);
+    try {
+      const result = await sendOfferEmail(slugState);
+      setEmailSentAt(result.emailSentAt);
+      setConfirmEmailOpen(false);
+    } catch (err) {
+      setEmailError(err.message);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   return (
     <Box sx={{ maxWidth: 640 }}>
       <Button onClick={onBack} sx={{ marginBottom: '16px', paddingLeft: 0 }}>
@@ -161,6 +188,13 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
       <Section title="Candidato">
         <FieldRow label="Nombre completo" value={fields.candidateFullName} onChange={handleChange('candidateFullName')} confidence={confidenceFor('candidateFullName')} required />
         <FieldRow label="Nombre de pila (para el saludo)" value={fields.candidateFirstName} onChange={handleChange('candidateFirstName')} confidence={confidenceFor('candidateFirstName')} required />
+        <FieldRow
+          label="Email del candidato"
+          value={fields.candidateEmail}
+          onChange={handleChange('candidateEmail')}
+          type="email"
+          helperText="No aparece en la carta — hace falta introducirlo a mano para poder enviarle el enlace."
+        />
         <FieldRow
           label="Puesto a mostrar en la web"
           value={fields.role}
@@ -187,12 +221,38 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
       <Section title="Enlace">
         <FieldRow label="Slug de la URL (déjalo en blanco para generarlo)" value={fields.slug} onChange={handleChange('slug')} />
         {publishedUrl && (
-          <Alert icon={<LinkIcon fontSize="small" />} severity="success" sx={{ marginTop: '4px' }}>
+          <Alert icon={<LinkIcon fontSize="small" />} severity="success" sx={{ marginTop: '4px', marginBottom: '16px' }}>
             Publicada:{' '}
             <a href={publishedUrl} style={{ color: 'inherit', wordBreak: 'break-all' }}>
               {publishedUrl}
             </a>
           </Alert>
+        )}
+
+        {status === 'published' && (
+          <Box>
+            <Button
+              variant="outlined"
+              startIcon={<MailOutlineIcon />}
+              onClick={() => {
+                setEmailError(null);
+                setConfirmEmailOpen(true);
+              }}
+              disabled={!fields.candidateEmail}
+            >
+              Enviar oferta por email
+            </Button>
+            {!fields.candidateEmail && (
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', marginTop: '6px' }}>
+                Añade el email del candidato arriba para poder enviarlo.
+              </Typography>
+            )}
+            {emailSentAt && (
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', marginTop: '6px' }}>
+                Último envío: {new Date(emailSentAt).toLocaleString('es-ES')}
+              </Typography>
+            )}
+          </Box>
         )}
       </Section>
 
@@ -215,6 +275,43 @@ export default function ReviewForm({ extraction, sourceDocBlobUrl, offer, onSave
           {status === 'published' ? 'Actualizar publicación' : 'Publicar'}
         </Button>
       </Box>
+
+      <Dialog open={confirmEmailOpen} onClose={() => !sendingEmail && setConfirmEmailOpen(false)}>
+        <DialogTitle>¿Enviar la oferta por email?</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontSize: 14, marginBottom: '12px' }}>
+            Se enviará un email a <strong>{fields.candidateEmail}</strong> con el enlace a su
+            oferta:
+          </Typography>
+          <Typography sx={{ fontSize: 13, color: 'text.secondary', wordBreak: 'break-all', marginBottom: '12px' }}>
+            {publishedUrl}
+          </Typography>
+          {emailSentAt && (
+            <Alert severity="warning" sx={{ marginBottom: '12px' }}>
+              Ya se envió antes, el {new Date(emailSentAt).toLocaleString('es-ES')}. Esto enviará
+              un nuevo correo.
+            </Alert>
+          )}
+          {emailError && (
+            <Alert severity="error" sx={{ marginBottom: '12px' }}>
+              {emailError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmEmailOpen(false)} disabled={sendingEmail}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={confirmSendEmail}
+            disabled={sendingEmail}
+            startIcon={sendingEmail ? <CircularProgress size={16} color="inherit" /> : null}
+          >
+            Confirmar y enviar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

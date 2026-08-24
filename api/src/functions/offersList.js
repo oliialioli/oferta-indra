@@ -18,6 +18,7 @@ app.http('offersList', {
       status: offer.status,
       createdAt: offer.createdAt,
       publishedAt: offer.publishedAt,
+      emailSentAt: offer.emailSentAt,
       candidateFullName: offer.letter.candidateFullName,
       role: offer.display.role,
     }));

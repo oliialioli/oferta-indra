@@ -43,3 +43,7 @@ export function createOffer(payload) {
 export function updateOffer(slug, payload) {
   return request(`/${encodeURIComponent(slug)}`, { method: 'PATCH', body: JSON.stringify(payload) });
 }
+
+export function sendOfferEmail(slug) {
+  return request(`/${encodeURIComponent(slug)}/send-email`, { method: 'POST' });
+}

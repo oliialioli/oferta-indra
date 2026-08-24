@@ -31,6 +31,7 @@ app.http('offersCreate', {
       createdBy: principal.userDetails || principal.userId,
       createdAt: now,
       publishedAt: null,
+      emailSentAt: null,
       sourceDocBlobUrl: body.sourceDocBlobUrl || null,
       letter: body.letter,
       display: body.display,

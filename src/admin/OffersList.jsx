@@ -12,6 +12,8 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import AddIcon from '@mui/icons-material/Add';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import Tooltip from '@mui/material/Tooltip';
 import { listOffers } from './adminApi';
 
 const STATUS_CHIP = {
@@ -63,6 +65,7 @@ export default function OffersList({ onSelectOffer, onNew }) {
                 <TableCell>Candidato</TableCell>
                 <TableCell>Puesto</TableCell>
                 <TableCell>Estado</TableCell>
+                <TableCell>Email</TableCell>
                 <TableCell>Creada</TableCell>
                 <TableCell align="right" />
               </TableRow>
@@ -76,6 +79,15 @@ export default function OffersList({ onSelectOffer, onNew }) {
                     <TableCell>{offer.role}</TableCell>
                     <TableCell>
                       <Chip size="small" label={chip.label} color={chip.color} />
+                    </TableCell>
+                    <TableCell>
+                      {offer.emailSentAt ? (
+                        <Tooltip title={`Enviado ${new Date(offer.emailSentAt).toLocaleString('es-ES')}`}>
+                          <MailOutlineIcon fontSize="small" color="success" />
+                        </Tooltip>
+                      ) : (
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>—</Typography>
+                      )}
                     </TableCell>
                     <TableCell>{new Date(offer.createdAt).toLocaleDateString('es-ES')}</TableCell>
                     <TableCell align="right">
