@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { buildScreens, devFixtureOffer } from './staticOfferData';
 
-const EMPTY_STATE = { loading: true, error: null, candidate: null, stats: null, screens: null };
+const EMPTY_STATE = { loading: true, error: null, candidate: null, stats: null, screens: null, offerExpiresAt: null };
 
 /**
  * Fetches one offer's dynamic data (candidate + stats) by slug from
@@ -21,8 +21,8 @@ export function useOfferData(slug) {
 
     if (!slug) {
       if (import.meta.env.DEV) {
-        const { candidate, stats } = devFixtureOffer;
-        setState({ loading: false, error: null, candidate, stats, screens: buildScreens(candidate) });
+        const { candidate, stats, offerExpiresAt } = devFixtureOffer;
+        setState({ loading: false, error: null, candidate, stats, screens: buildScreens(candidate), offerExpiresAt });
       } else {
         setState({ loading: false, error: 'not-found', candidate: null, stats: null, screens: null });
       }
@@ -35,9 +35,16 @@ export function useOfferData(slug) {
         if (!res.ok) throw new Error(res.status === 404 ? 'not-found' : 'fetch-error');
         return res.json();
       })
-      .then(({ candidate, stats }) => {
+      .then(({ candidate, stats, offerExpiresAt }) => {
         if (cancelled) return;
-        setState({ loading: false, error: null, candidate, stats, screens: buildScreens(candidate) });
+        setState({
+          loading: false,
+          error: null,
+          candidate,
+          stats,
+          screens: buildScreens(candidate),
+          offerExpiresAt: offerExpiresAt || null,
+        });
       })
       .catch((err) => {
         if (cancelled) return;

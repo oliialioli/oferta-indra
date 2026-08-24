@@ -21,6 +21,12 @@ function formatRetribucion(retribucion) {
   return `${formatted}€${retribucion.payFrequencyNote ? ` ${retribucion.payFrequencyNote}` : ''}`;
 }
 
+function addDays(isoDateTime, days) {
+  const date = new Date(isoDateTime);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString();
+}
+
 function toFrontendPayload(offer) {
   const { letter, display, boilerplateStats } = offer;
 
@@ -54,7 +60,13 @@ function toFrontendPayload(offer) {
     },
   ];
 
-  return { candidate, stats };
+  // publishedAt is only set at the moment of publishing, so the expiry
+  // date is fixed then too — re-publishing an edit doesn't reset the
+  // candidate's original window.
+  const offerExpiresAt =
+    offer.publishedAt && offer.offerValidityDays ? addDays(offer.publishedAt, offer.offerValidityDays) : null;
+
+  return { candidate, stats, offerExpiresAt };
 }
 
 module.exports = { toFrontendPayload };

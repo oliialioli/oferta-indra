@@ -135,6 +135,7 @@ export const sectors = [
 // import.meta.env.DEV and no slug is present in the URL.
 export const devFixtureOffer = {
   candidate: { name: 'Raquel', role: 'CNS Training Instructor', company: 'Indra Group', avatarName: 'Buddy' },
+  offerExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   stats: [
     { label: 'FECHA DE INCORPORACIÓN', value: '16/10/2026' },
     { label: 'TIPO DE CONTRATO', value: 'Indefinido' },

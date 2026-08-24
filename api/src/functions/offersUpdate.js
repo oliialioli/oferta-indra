@@ -25,6 +25,7 @@ app.http('offersUpdate', {
       letter: body.letter || existing.letter,
       display: body.display || existing.display,
       boilerplateStats: body.boilerplateStats || existing.boilerplateStats,
+      offerValidityDays: body.offerValidityDays ?? existing.offerValidityDays,
     };
 
     if (body.publish) {

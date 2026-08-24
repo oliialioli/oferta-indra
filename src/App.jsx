@@ -19,7 +19,7 @@ import { colors } from './theme/theme';
 const SCREEN_COUNT = 5;
 
 export default function App({ slug }) {
-  const { candidate, screens, stats, loading, error } = useOfferData(slug);
+  const { candidate, screens, stats, offerExpiresAt, loading, error } = useOfferData(slug);
   const { register, revealed, activeIndex, scrollToNext } = useRevealOnScroll(SCREEN_COUNT);
   const [modalOpen, setModalOpen] = useState(false);
   // Owned here (not inside AvatarNarrator) so the active Screen's own body
@@ -32,6 +32,16 @@ export default function App({ slug }) {
     [activeIndex]
   );
   const sectionLabel = `${activeIndex + 1} de ${SCREEN_COUNT}`;
+
+  const expiryNotice = useMemo(() => {
+    if (!offerExpiresAt) return null;
+    const formatted = new Date(offerExpiresAt).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    return `Esta oferta es válida hasta el ${formatted}.`;
+  }, [offerExpiresAt]);
 
   const narratedFor = (index) => ({
     audioRef: narrator.audioRef,
@@ -87,6 +97,7 @@ export default function App({ slug }) {
             narrated={narratedFor(0)}
             wordTimestamps={screens.intro.wordTimestamps}
             secondaryText={screens.intro.secondaryText}
+            expiryNotice={expiryNotice}
             closingText={screens.intro.closingText}
           />
 
@@ -159,6 +170,7 @@ export default function App({ slug }) {
         onClose={() => setModalOpen(false)}
         candidateName={candidate.name}
         slug={slug}
+        expiryNotice={expiryNotice}
       />
     </>
   );

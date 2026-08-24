@@ -20,6 +20,14 @@ const secondaryTextSx = {
   margin: 0,
 };
 
+const expiryNoticeSx = {
+  fontSize: { xs: 'clamp(12px, 3.2vw, 13px)', md: 'clamp(11px, 1.4vw, 13px)' },
+  lineHeight: 1.5,
+  color: colors.grisAcero,
+  opacity: 0.85,
+  margin: 0,
+};
+
 // Karaoke text needs more presence than an auxiliary line but stays under
 // the title — see the content brief's visual hierarchy: legible, a step
 // down from the headline, generous line-height, never competing with the
@@ -39,6 +47,7 @@ const Screen = forwardRef(function Screen(
     narrated,
     wordTimestamps,
     secondaryText,
+    expiryNotice,
     closingText,
     closingPosition = 'body',
     badges,
@@ -115,6 +124,7 @@ const Screen = forwardRef(function Screen(
         )}
 
         {secondaryText && <Typography sx={secondaryTextSx}>{secondaryText}</Typography>}
+        {expiryNotice && <Typography sx={expiryNoticeSx}>{expiryNotice}</Typography>}
 
         {closingPosition === 'body' && closingNode}
       </Box>

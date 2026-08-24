@@ -29,6 +29,7 @@ function extractionToFields(extraction) {
     periodoPruebaMeses: extraction.periodoPruebaMeses.value ?? '',
     retribucionAmount: extraction.retribucionAnualBruta.value?.amount ?? '',
     retribucionPayFrequencyNote: extraction.retribucionAnualBruta.value?.payFrequencyNote ?? '',
+    offerValidityDays: 7,
     slug: '',
   };
 }
@@ -47,6 +48,7 @@ function offerToFields(offer) {
     periodoPruebaMeses: offer.letter.periodoPruebaMeses ?? '',
     retribucionAmount: offer.letter.retribucionAnualBruta?.amount ?? '',
     retribucionPayFrequencyNote: offer.letter.retribucionAnualBruta?.payFrequencyNote ?? '',
+    offerValidityDays: offer.offerValidityDays ?? 7,
     slug: offer.slug,
   };
 }
@@ -74,6 +76,7 @@ function fieldsToPayload(fields, sourceDoc) {
       },
     },
     display: { role: fields.role },
+    offerValidityDays: fields.offerValidityDays === '' ? null : Number(fields.offerValidityDays),
   };
 }
 
@@ -230,6 +233,16 @@ export default function ReviewForm({
       <Section title="Retribución">
         <FieldRow label="Retribución anual bruta (€)" value={fields.retribucionAmount} onChange={handleChange('retribucionAmount')} confidence={confidenceFor('retribucionAnualBruta')} type="number" />
         <FieldRow label="Nota de pagas (ej. 'en 14 pagas')" value={fields.retribucionPayFrequencyNote} onChange={handleChange('retribucionPayFrequencyNote')} />
+      </Section>
+
+      <Section title="Validez de la oferta">
+        <FieldRow
+          label="Días de validez desde la publicación"
+          value={fields.offerValidityDays}
+          onChange={handleChange('offerValidityDays')}
+          type="number"
+          helperText="El candidato verá un aviso con la fecha límite; pasada esa fecha, el enlace deja de mostrar la oferta. Coincide con la cláusula de validez de la plantilla (7 días)."
+        />
       </Section>
 
       <Section title="Enlace">

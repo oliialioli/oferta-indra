@@ -14,6 +14,10 @@ app.http('offersGet', {
     if (!offer || offer.status !== 'published' || !offer.renderPayload) {
       return { status: 404, jsonBody: { error: 'Oferta no encontrada o no publicada.' } };
     }
+    const { offerExpiresAt } = offer.renderPayload;
+    if (offerExpiresAt && new Date(offerExpiresAt) <= new Date()) {
+      return { status: 404, jsonBody: { error: 'La oferta ha caducado.' } };
+    }
     return { jsonBody: offer.renderPayload };
   },
 });

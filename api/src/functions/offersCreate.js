@@ -32,6 +32,10 @@ app.http('offersCreate', {
       createdAt: now,
       publishedAt: null,
       emailSentAt: null,
+      // Matches the template's own validity clause ("la oferta tiene una
+      // validez de 7 días") — editable per-offer since not every letter
+      // necessarily uses the same window.
+      offerValidityDays: body.offerValidityDays ?? 7,
       sourceDocBlobUrl: body.sourceDocBlobUrl || null,
       sourceDocBlobName: body.sourceDocBlobName || null,
       sourceDocFileName: body.sourceDocFileName || null,
