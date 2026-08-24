@@ -26,13 +26,17 @@ app.http('offersSendEmail', {
       return { status: 400, jsonBody: { error: 'Falta el email del candidato en los datos de la oferta.' } };
     }
 
-    const offerUrl = `${new URL(request.url).origin}/oferta/${slug}`;
+    const origin = new URL(request.url).origin;
+    const offerUrl = `${origin}/oferta/${slug}`;
+    const avatarUrl = `${origin}/email-assets/buddy-avatar-poster.png`;
 
     try {
       await sendOfferEmail({
         candidateEmail: offer.letter.candidateEmail,
         candidateFirstName: offer.letter.candidateFirstName,
+        role: offer.display.role,
         offerUrl,
+        avatarUrl,
       });
     } catch (err) {
       if (err.code === 'EMAIL_NOT_CONFIGURED') {
