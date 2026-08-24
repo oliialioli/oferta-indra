@@ -4,6 +4,22 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import OfferButton from './OfferButton';
 import { colors } from '../theme/theme';
 
+const CYAN = '#22D3EE';
+const BAR_HEIGHTS = [7, 13, 9, 15];
+
+// Static 4-bar waveform glyph — same visual language as the "Hablando"
+// pill's MiniWave (AvatarNarrator.jsx), but still (nothing is playing yet)
+// and sized as a standalone icon rather than a tiny status indicator.
+function WaveformIcon() {
+  return (
+    <Box aria-hidden="true" sx={{ display: 'flex', alignItems: 'center', gap: '3px', flex: 'none' }}>
+      {BAR_HEIGHTS.map((height, i) => (
+        <Box key={i} sx={{ width: 3, height, background: CYAN, borderRadius: '2px' }} />
+      ))}
+    </Box>
+  );
+}
+
 // The one-time, explicit choice for whether Buddy narrates at all — shown
 // only on the intro screen, in place of its body text, and only until the
 // visitor picks one of the two options. Deliberately not a modal: it sits
@@ -12,25 +28,38 @@ import { colors } from '../theme/theme';
 // than an interruption blocking it.
 export default function AudioInviteCard({ onStart, onSkip }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '58ch' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '18px',
+        maxWidth: '58ch',
+        padding: { xs: '18px 20px', md: '22px 24px' },
+        border: '1px solid rgba(255,255,255,0.16)',
+        borderRadius: '10px',
+      }}
+    >
       <Box>
-        <Typography
-          sx={{
-            fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 'clamp(15px, 2.1vw, 22px)' },
-            lineHeight: { xs: 1.5, md: 1.4 },
-            color: colors.blanco,
-            fontWeight: 500,
-            margin: '0 0 4px',
-          }}
-        >
-          Conoce tu propuesta con Buddy
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+          <WaveformIcon />
+          <Typography
+            sx={{
+              fontSize: { xs: 'clamp(17px, 4.5vw, 19px)', md: 'clamp(15px, 2.1vw, 22px)' },
+              lineHeight: 1.3,
+              color: colors.blanco,
+              fontWeight: 500,
+              margin: 0,
+            }}
+          >
+            Conoce tu propuesta con Buddy
+          </Typography>
+        </Box>
         <Typography sx={{ fontSize: { xs: 14, md: 15 }, lineHeight: 1.5, color: colors.grisAcero, margin: 0 }}>
           Un recorrido narrado de unos minutos. Podrás desactivar la narración cuando quieras.
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
         <OfferButton
           onClick={onStart}
           icon={<VolumeUpIcon />}
@@ -39,27 +68,9 @@ export default function AudioInviteCard({ onStart, onSkip }) {
           Comenzar con Buddy
         </OfferButton>
 
-        <Box
-          component="button"
-          type="button"
-          onClick={onSkip}
-          aria-label="Continuar sin narración de audio"
-          sx={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            fontFamily: 'inherit',
-            fontSize: 14,
-            color: colors.grisAcero,
-            textDecoration: 'underline',
-            textUnderlineOffset: '3px',
-            cursor: 'pointer',
-            transition: 'color .15s ease',
-            '&:hover': { color: colors.blanco },
-          }}
-        >
+        <OfferButton variant="ghost" onClick={onSkip} aria-label="Continuar sin narración de audio">
           Ver sin audio
-        </Box>
+        </OfferButton>
       </Box>
     </Box>
   );
