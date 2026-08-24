@@ -59,4 +59,31 @@ const theme = createTheme({
   },
 });
 
+// Separate light-mode theme for the internal /interno admin tool — the
+// main theme above is dark-mode for the candidate-facing microsite
+// (white text by default), which renders unreadable (near-invisible white
+// text) on the admin tool's light background if reused as-is.
+export const adminTheme = createTheme({
+  palette: {
+    mode: 'light',
+    background: { default: '#f4f5f3', paper: '#ffffff' },
+    primary: { main: colors.azulOscuro, contrastText: colors.blanco },
+    text: { primary: '#16232a', secondary: 'rgba(22,35,42,0.62)' },
+    success: { main: '#1e7e42' },
+    warning: { main: '#a8631a' },
+    divider: 'rgba(22,35,42,0.1)',
+  },
+  typography: {
+    fontFamily: 'var(--font-stack)',
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiButtonBase: {
+      defaultProps: { disableRipple: true },
+    },
+  },
+});
+
 export default theme;
