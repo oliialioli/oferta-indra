@@ -5,9 +5,9 @@ const SECTION_DEBOUNCE_MS = 500; // let a section actually settle in view before
 const FINISHED_HOLD_MS = 1500; // how long the "Audio finalizado" pill shows before confirmation/idle
 const AUDIO_CHOICE_KEY = 'oferta-indra:audio-choice';
 
-// The intro screen's audio choice is mandatory once per session (see
-// App.jsx's useScrollLock) — reloading mid-session shouldn't ask again or
-// re-lock scroll, so the choice is remembered in sessionStorage. Wrapped in
+// The onboarding screen's audio choice is mandatory once per session (see
+// App.jsx and OnboardingScreen.jsx) — reloading mid-session shouldn't ask
+// again, so the choice is remembered in sessionStorage. Wrapped in
 // try/catch since storage can throw in private-browsing contexts.
 function readStoredAudioChoice() {
   try {
@@ -30,7 +30,7 @@ function writeStoredAudioChoice(value) {
 // controls: inactive | playing | paused | ended | error.
 //
 // Whether audio narrates at all is a one-time, explicit choice made on the
-// intro screen (see AudioInviteCard.jsx) — audioDecided tracks whether
+// onboarding screen (see OnboardingScreen.jsx) — audioDecided tracks whether
 // that choice has been made yet at all, audioEnabled tracks which way it
 // went. Before the choice (or if declined), entering a section never plays
 // audio and Buddy just idles — no more per-section "presenting" gesture,
@@ -46,13 +46,13 @@ function writeStoredAudioChoice(value) {
 // does.
 export function useNarrator({ activeIndex, modalOpen }) {
   // Read once, on mount, whether this session already answered the audio
-  // choice — a reload shouldn't ask again or replay the greeting/re-lock
-  // scroll (see App.jsx's useScrollLock, gated on !audioDecided).
+  // choice — a reload shouldn't ask again or replay the greeting (App.jsx
+  // skips OnboardingScreen entirely once audioDecided is already true).
   const [storedChoice] = useState(readStoredAudioChoice);
   // Starts on the one-shot greeting gesture (see narratorVideos.js) rather
-  // than idle — it's the very first thing a visitor sees, before the
-  // intro screen's audio choice even renders. Skipped entirely if the
-  // choice was already made earlier this session.
+  // than idle — it's the very first thing a visitor sees, on the
+  // onboarding screen. Skipped entirely if the choice was already made
+  // earlier this session.
   const [state, setState] = useState(() => (storedChoice ? 'idle' : 'greeting'));
   const [audioEnabled, setAudioEnabled] = useState(() => storedChoice === 'enabled');
   const [audioDecided, setAudioDecided] = useState(() => Boolean(storedChoice));
@@ -151,9 +151,23 @@ export function useNarrator({ activeIndex, modalOpen }) {
     stopAudio();
   }, [clearTimers, stopAudio]);
 
+  // Section that wants to play but couldn't yet because the shared <audio>
+  // element didn't exist at call time — specifically, OnboardingScreen's
+  // "Comenzar con Buddy" calls enableAudio() -> playSectionAudio() in the
+  // very same click that flips audioDecided, which is what makes
+  // AvatarNarrator (and the <audio> element it owns via setAudioNode)
+  // mount in the first place. At that exact moment audioRef.current is
+  // still null, so without this, the very first section's narration would
+  // silently never start. Retried below once audioMounted flips true.
+  const pendingPlayRef = useRef(null);
+
   const playSectionAudio = useCallback((sec) => {
     const audio = audioRef.current;
-    if (!audio || !sec.audioSrc) return;
+    if (!audio) {
+      pendingPlayRef.current = sec;
+      return;
+    }
+    if (!sec.audioSrc) return;
     if (audio.getAttribute('src') !== sec.audioSrc) {
       audio.setAttribute('src', sec.audioSrc);
     }
@@ -161,6 +175,14 @@ export function useNarrator({ activeIndex, modalOpen }) {
     const p = audio.play();
     if (p?.catch) p.catch(() => setAudioPhase('error'));
   }, []);
+
+  useEffect(() => {
+    if (!audioMounted) return;
+    const pending = pendingPlayRef.current;
+    if (!pending) return;
+    pendingPlayRef.current = null;
+    playSectionAudio(pending);
+  }, [audioMounted, playSectionAudio]);
 
   const runSectionEntry = useCallback(
     (sec) => {

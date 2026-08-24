@@ -10,9 +10,9 @@ import ReasonsList from './components/ReasonsList';
 import SectorsGrid from './components/SectorsGrid';
 import StickyCta from './components/StickyCta';
 import AcceptModal from './components/AcceptModal';
+import OnboardingScreen from './components/OnboardingScreen';
 import { useRevealOnScroll } from './hooks/useRevealOnScroll';
 import { useNarrator } from './hooks/useNarrator';
-import { useScrollLock } from './hooks/useScrollLock';
 import { useOfferData } from './data/useOfferData';
 import { benefits, reasons, sectors } from './data/staticOfferData';
 import { colors } from './theme/theme';
@@ -25,14 +25,11 @@ export default function App({ slug }) {
   const [modalOpen, setModalOpen] = useState(false);
   // Owned here (not inside AvatarNarrator) so the active Screen's own body
   // text can be highlighted in sync with the same audio element/state —
-  // see NarratedText.jsx.
+  // see NarratedText.jsx. Created unconditionally (before the onboarding
+  // branch below) and shared by both OnboardingScreen and the tour, so the
+  // audio choice is one real state transition (narrator.audioDecided)
+  // rather than a separate signal that has to be bridged between them.
   const narrator = useNarrator({ activeIndex, modalOpen });
-  // Mandatory once per session, not a permanent gate: locks scroll only
-  // until the intro screen's audio choice is made (or was already made
-  // earlier this session — see useNarrator's sessionStorage read) — needed
-  // both so everyone actually sees that choice exists and because playing
-  // audio at all requires a real user gesture in most browsers.
-  useScrollLock(!narrator.audioDecided);
 
   const progressPct = useMemo(
     () => Math.round((activeIndex / (SCREEN_COUNT - 1)) * 100),
@@ -85,6 +82,18 @@ export default function App({ slug }) {
     );
   }
 
+  // A genuinely separate page, not a locked first screen inside the tour —
+  // none of the tour's markup below (header progress, 5 sections, nav bar)
+  // mounts until this is done, so there's nothing to accidentally scroll
+  // into and nothing to lock. See OnboardingScreen.jsx. Skipped entirely
+  // once narrator.audioDecided is already true — either because the choice
+  // was just made (its own buttons call narrator.enableAudio/declineAudio
+  // directly) or because it was made earlier this session and useNarrator
+  // recovered it from sessionStorage on mount.
+  if (!narrator.audioDecided) {
+    return <OnboardingScreen candidate={candidate} expiryNotice={expiryNotice} narrator={narrator} />;
+  }
+
   return (
     <>
       <Header roleLabel={candidate.role} sectionLabel={sectionLabel} progressPct={progressPct} />
@@ -113,7 +122,6 @@ export default function App({ slug }) {
             body={screens.intro.body}
             narrated={narratedFor(0)}
             wordTimestamps={screens.intro.wordTimestamps}
-            audioInvite={{ show: !narrator.audioDecided }}
             secondaryText={screens.intro.secondaryText}
             expiryNotice={expiryNotice}
             closingText={screens.intro.closingText}
@@ -181,9 +189,6 @@ export default function App({ slug }) {
         activeIndex={activeIndex}
         screenCount={SCREEN_COUNT}
         onNext={scrollToNext}
-        audioDecided={narrator.audioDecided}
-        onStartAudio={narrator.enableAudio}
-        onSkipAudio={narrator.declineAudio}
       />
 
       <AcceptModal
