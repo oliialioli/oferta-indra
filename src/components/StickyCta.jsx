@@ -1,4 +1,5 @@
 import CheckIcon from '@mui/icons-material/Check';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -20,7 +21,7 @@ const compactFillSx = { ...compactButtonSx, flex: 1 };
 // audio choice is done (see OnboardingScreen.jsx, which has its own
 // separate fixed bar for that choice). Never shows anything audio-related;
 // Pausar/Silenciar/Volver a escuchar live next to Buddy (AvatarNarrator.jsx).
-export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, onNext }) {
+export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, onNext, onPrev }) {
   const isLast = activeIndex >= screenCount - 1;
   const nextLabel = SECTION_LABELS[activeIndex + 1];
 
@@ -43,7 +44,7 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           bottom: 0,
           zIndex: 80,
           alignItems: 'center',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           gap: '24px',
           padding: '18px clamp(20px, 2.11vw, 40px)',
           background: 'rgba(0,25,34,0.85)',
@@ -51,21 +52,31 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {!isLast && (
-          <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta">
-            Aceptar oferta
-          </OfferButton>
-        )}
-
-        {!isLast ? (
-          <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label={`Siguiente: ${nextLabel}`}>
-            Siguiente: {nextLabel}
+        {activeIndex > 0 ? (
+          <OfferButton variant="ghost" onClick={() => onPrev?.(activeIndex)} icon={<ArrowBackIcon />} aria-label="Volver a la sección anterior">
+            Atrás
           </OfferButton>
         ) : (
-          <OfferButton onClick={onAccept} endIcon={<CheckIcon />} aria-label="Descargar y aceptar la oferta de Indra Group">
-            Descargar y aceptar oferta
-          </OfferButton>
+          <Box />
         )}
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          {!isLast && (
+            <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta">
+              Aceptar oferta
+            </OfferButton>
+          )}
+
+          {!isLast ? (
+            <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label={`Siguiente: ${nextLabel}`}>
+              Siguiente: {nextLabel}
+            </OfferButton>
+          ) : (
+            <OfferButton onClick={onAccept} endIcon={<CheckIcon />} aria-label="Descargar y aceptar la oferta de Indra Group">
+              Descargar y aceptar oferta
+            </OfferButton>
+          )}
+        </Box>
       </Box>
 
       {/* Mobile: compact bar — section counter + "Siguiente" (or "Aceptar

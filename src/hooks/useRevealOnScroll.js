@@ -92,5 +92,12 @@ export function useRevealOnScroll(screenCount) {
     }
   }, []);
 
-  return { register, revealed, activeIndex, scrollToNext };
+  // No need to touch `revealed` here — a previous screen was already
+  // revealed on the way past it, and its fade-in only ever plays once.
+  const scrollToPrev = useCallback((index) => {
+    const prev = refs.current[index - 1];
+    if (prev) prev.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  return { register, revealed, activeIndex, scrollToNext, scrollToPrev };
 }

@@ -21,7 +21,7 @@ const SCREEN_COUNT = 5;
 
 export default function App({ slug }) {
   const { candidate, screens, stats, offerExpiresAt, loading, error } = useOfferData(slug);
-  const { register, revealed, activeIndex, scrollToNext } = useRevealOnScroll(SCREEN_COUNT);
+  const { register, revealed, activeIndex, scrollToNext, scrollToPrev } = useRevealOnScroll(SCREEN_COUNT);
   const [modalOpen, setModalOpen] = useState(false);
   // Owned here (not inside AvatarNarrator) so the active Screen's own body
   // text can be highlighted in sync with the same audio element/state —
@@ -189,6 +189,7 @@ export default function App({ slug }) {
         activeIndex={activeIndex}
         screenCount={SCREEN_COUNT}
         onNext={scrollToNext}
+        onPrev={scrollToPrev}
       />
 
       <AcceptModal
