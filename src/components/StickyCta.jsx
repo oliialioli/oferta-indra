@@ -41,28 +41,9 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
         }}
       >
         {!isLast ? (
-          <Box
-            component="button"
-            type="button"
-            onClick={onAccept}
-            aria-label="Saltar directamente a revisar y aceptar la oferta"
-            sx={{
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              margin: 0,
-              cursor: 'pointer',
-              fontFamily: 'inherit',
-              fontSize: 14,
-              color: colors.grisAcero,
-              textDecoration: 'underline',
-              textUnderlineOffset: '3px',
-              transition: 'color .2s',
-              '&:hover': { color: colors.blanco },
-            }}
-          >
-            Revisar y aceptar oferta
-          </Box>
+          <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a revisar la oferta">
+            Revisar oferta
+          </OfferButton>
         ) : (
           <span />
         )}

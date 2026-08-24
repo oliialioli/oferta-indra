@@ -23,19 +23,16 @@ export const screenTemplates = {
       'Queremos que tengas toda la información para decidir con confianza, porque creemos en las personas que impulsan el cambio.',
     ],
     tagline: () => 'Together, One Mission.',
-    cta: () => 'Descubre tu oferta',
   },
   details: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
     headline: () => 'Tu propuesta para unirte a Indra Group',
     body: () => 'El primer paso de una experiencia profesional para crecer, aprender y generar impacto real.',
-    cta: () => 'Más beneficios Indra Group',
   },
   benefits: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
     headline: () => 'Todo lo que ponemos a tu disposición para crecer y cuidarte',
     body: () => 'Entendemos el bienestar de forma integral: desarrollo profesional, salud y seguridad financiera.',
-    cta: () => 'Somos Top Employer',
   },
   topEmployer: {
     eyebrow: (candidate) => candidate.role.toUpperCase(),
@@ -45,7 +42,6 @@ export const screenTemplates = {
       { src: linkedinTopCompaniesSeal, alt: 'Sello LinkedIn Top Companies España 2026' },
     ],
     body: () => 'Reflejan nuestro compromiso con las personas: desarrollo, aprendizaje y oportunidades a largo plazo.',
-    cta: () => '¿Construimos juntos el futuro?',
     tagline: () => 'Together, One Mission.',
   },
   sectors: {
@@ -53,7 +49,6 @@ export const screenTemplates = {
     headline: () => 'Tu talento puede ayudarnos a construir el futuro.',
     body: () =>
       'Formarás parte de una compañía tecnológica global que vive uno de sus momentos más relevantes, transformando sectores estratégicos.',
-    cta: () => 'Quiero formar parte de esta misión',
   },
 };
 
