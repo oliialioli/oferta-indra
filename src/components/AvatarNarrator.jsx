@@ -9,6 +9,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import CheckIcon from '@mui/icons-material/Check';
 import OfferButton from './OfferButton';
+import CornerFrame from './CornerFrame';
 import { colors, HEADER_HEIGHT_MOBILE } from '../theme/theme';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { useVideoCrossfade, LAYER_REF_KEYS, CROSSFADE_MS } from '../hooks/useVideoCrossfade';
@@ -20,45 +21,6 @@ const CYAN = '#22D3EE';
 // time but not exactly matching, which is what made the frame's edge
 // readable as a rectangle against the page.
 const VIDEO_BG = '#002333';
-
-// The four open corner brackets framing the character — an Indra brand
-// mark (the same chamfered-corner language as OfferButton's hover state),
-// drawn once and mirrored into the other three corners.
-function CornerFrame() {
-  const corner = (
-    <Box
-      component="svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      sx={{ position: 'absolute', width: 36, height: 36, top: 0, left: 0 }}
-    >
-      <path
-        d="M1 22V6L6 1H22"
-        stroke="rgba(255,255,255,0.7)"
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Box>
-  );
-
-  return (
-    <Box
-      aria-hidden="true"
-      sx={{
-        position: 'absolute',
-        inset: 0,
-        display: 'block',
-        pointerEvents: 'none',
-      }}
-    >
-      {corner}
-      <Box sx={{ position: 'absolute', inset: 0, transform: 'scaleX(-1)' }}>{corner}</Box>
-      <Box sx={{ position: 'absolute', inset: 0, transform: 'scaleY(-1)' }}>{corner}</Box>
-      <Box sx={{ position: 'absolute', inset: 0, transform: 'scale(-1, -1)' }}>{corner}</Box>
-    </Box>
-  );
-}
 
 function MiniWave({ animate }) {
   return (

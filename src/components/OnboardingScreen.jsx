@@ -5,6 +5,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import OfferButton from './OfferButton';
 import OnboardingBuddy from './OnboardingBuddy';
+import TypewriterHeadline from './TypewriterHeadline';
 import { colors } from '../theme/theme';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import indraLogo from '../assets/images/indra-logo.svg';
@@ -97,18 +98,11 @@ export default function OnboardingScreen({ candidate, expiryNotice, narrator }) 
             <Typography sx={{ fontSize: { xs: 13, md: 15 }, color: colors.grisAcero, margin: '0 0 6px' }}>
               TU PROPUESTA · {candidate.role.toUpperCase()}
             </Typography>
-            <Typography
-              component="h1"
-              sx={{
-                fontSize: { xs: 'clamp(38px, 10vw, 48px)', md: 'clamp(32px, 4vw, 48px)' },
-                lineHeight: { xs: 1.02, md: 1.02 },
-                color: colors.blanco,
-                fontWeight: 400,
-                margin: 0,
-              }}
-            >
-              {candidate.name}, tu próxima misión puede comenzar aquí.
-            </Typography>
+            <TypewriterHeadline
+              text={`${candidate.name}, tu próxima misión puede comenzar aquí.`}
+              start
+              variant="hero"
+            />
           </Box>
 
           <Box
