@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import CornerFrame from './CornerFrame';
 import { colors } from '../theme/theme';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { useVideoCrossfade, LAYER_REF_KEYS, CROSSFADE_MS } from '../hooks/useVideoCrossfade';
@@ -79,6 +80,8 @@ export default function OnboardingBuddy({ avatarName = 'Buddy', narrator }) {
             background: `radial-gradient(ellipse at center, transparent 72%, ${colors.azulOscuro} 100%)`,
           }}
         />
+
+        <CornerFrame />
       </Box>
     </Box>
   );

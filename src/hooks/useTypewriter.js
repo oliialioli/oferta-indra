@@ -11,7 +11,7 @@ export function useTypewriter(text, start, speedMs = 16) {
   const startedRef = useRef(false);
 
   useEffect(() => {
-    if (!start || startedRef.current || !text) return;
+    if (!start || startedRef.current || !text) return undefined;
     startedRef.current = true;
     setIsTyping(true);
 
@@ -25,7 +25,17 @@ export function useTypewriter(text, start, speedMs = 16) {
       }
     }, speedMs);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      // Reset the guard on cleanup, not just the interval — otherwise a
+      // `start` that's already true on first mount (rather than flipping
+      // false->true later, like Screen.jsx's scroll-driven `revealed`)
+      // walks straight into React 18 StrictMode's dev-only mount ->
+      // cleanup -> remount: the fake cleanup clears the interval, but
+      // startedRef staying true blocks the real remount from starting a
+      // new one, leaving the caret blinking forever with no text typed.
+      startedRef.current = false;
+    };
   }, [start, text, speedMs]);
 
   return { typed, isTyping };
