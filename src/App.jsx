@@ -58,6 +58,16 @@ export default function App({ slug }) {
     );
   }
 
+  if (error === 'fetch-error') {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+        <Typography sx={{ color: colors.blanco, fontSize: 20 }}>
+          No hemos podido cargar tu oferta. Comprueba tu conexión e inténtalo de nuevo en unos minutos.
+        </Typography>
+      </Box>
+    );
+  }
+
   if (error || !candidate || !screens || !stats) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>

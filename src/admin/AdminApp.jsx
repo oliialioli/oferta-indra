@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
 import { adminTheme, colors } from '../theme/theme';
@@ -66,7 +68,20 @@ export default function AdminApp() {
             </Box>
           )}
           {view.name === 'loading-offer' && (
-            <OfferLoader slug={view.slug} onLoaded={(offer) => setView({ name: 'review', offer })} onError={() => setView({ name: 'list' })} />
+            <OfferLoader
+              slug={view.slug}
+              onLoaded={(offer) => setView({ name: 'review', offer })}
+              onError={(message) => setView({ name: 'load-error', message })}
+            />
+          )}
+
+          {view.name === 'load-error' && (
+            <Box>
+              <Alert severity="error" sx={{ marginBottom: '16px' }}>
+                No se pudo cargar la oferta: {view.message}
+              </Alert>
+              <Button onClick={() => setView({ name: 'list' })}>← Volver al listado</Button>
+            </Box>
           )}
 
           {view.name === 'review' && (
@@ -88,7 +103,9 @@ export default function AdminApp() {
 
 function OfferLoader({ slug, onLoaded, onError }) {
   useEffect(() => {
-    getOffer(slug).then(onLoaded).catch(onError);
+    getOffer(slug)
+      .then(onLoaded)
+      .catch((err) => onError(err.message));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
   return null;
