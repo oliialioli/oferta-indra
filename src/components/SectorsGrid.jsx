@@ -15,7 +15,11 @@ function SectorCard({ s, delay }) {
         flexDirection: 'column',
         justifyContent: 'flex-start',
         gap: '6px',
-        minHeight: 195,
+        // Fixed only at desktop, where cards share grid rows and this keeps
+        // them visually aligned even when content lengths differ slightly —
+        // on mobile (single column) it just left dead space under shorter
+        // cards, so there each card sizes to its own content instead.
+        minHeight: { xs: 'auto', md: 195 },
         ...revealSx(revealed, delay),
       }}
     >
