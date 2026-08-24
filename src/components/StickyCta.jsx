@@ -41,8 +41,8 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
         }}
       >
         {!isLast ? (
-          <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a revisar la oferta">
-            Revisar oferta
+          <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta">
+            Aceptar oferta
           </OfferButton>
         ) : (
           <span />
