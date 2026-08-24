@@ -78,7 +78,7 @@ const Screen = forwardRef(function Screen(
         flexDirection: 'column',
         justifyContent: { xs: 'flex-start', md: 'center' },
         textAlign: 'left',
-        padding: { xs: '20px 0 28px', md: '110px 0 140px' },
+        padding: { xs: '12px 0 24px', md: '110px 0 140px' },
         scrollMarginTop: { xs: HEADER_HEIGHT_MOBILE, md: 0 },
       }}
     >
@@ -86,8 +86,8 @@ const Screen = forwardRef(function Screen(
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
-          marginBottom: 3,
+          gap: { xs: 1.25, md: 2 },
+          marginBottom: { xs: 2, md: 3 },
           opacity: revealed ? 1 : 0,
           transform: revealed ? 'none' : 'translateY(16px)',
           transition: 'opacity .5s cubic-bezier(.2,.8,.2,1), transform .5s cubic-bezier(.2,.8,.2,1)',

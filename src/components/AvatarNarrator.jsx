@@ -335,7 +335,12 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
     <Box
       sx={{
         position: 'relative',
-        width: { xs: 'clamp(180px, 50vw, 210px)', md: 'clamp(140px, 19.4vw, 368px)' },
+        // Deliberately smaller than it "wants" to be on mobile — with a real
+        // browser's chrome (address bar + toolbar) eating into the visible
+        // viewport on first load, the previous size pushed the intro
+        // screen's audio-choice card mostly below the fold. Buddy's idle
+        // pose doesn't need to be huge to do its job.
+        width: { xs: 'clamp(120px, 32vw, 150px)', md: 'clamp(140px, 19.4vw, 368px)' },
         aspectRatio: '368 / 484',
         flex: 'none',
       }}
@@ -497,9 +502,9 @@ export default function AvatarNarrator({ avatarName = 'Buddy', narrator }) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: { xs: 'flex-start', md: 'center' },
-          gap: { xs: '16px', md: '24px' },
-          marginTop: { xs: `${HEADER_HEIGHT_MOBILE + 12}px`, md: 0 },
-          padding: { xs: '0 20px 20px', md: 0 },
+          gap: { xs: '10px', md: '24px' },
+          marginTop: { xs: `${HEADER_HEIGHT_MOBILE + 6}px`, md: 0 },
+          padding: { xs: '0 20px 12px', md: 0 },
           background: 'transparent',
           zIndex: 70,
         }}
