@@ -128,7 +128,7 @@ export default function OnboardingScreen({ candidate, expiryNotice, narrator }) 
             <Typography sx={{ fontSize: { xs: 17, md: 19 }, color: colors.blanco, fontWeight: 500, margin: 0 }}>
               Conoce tu propuesta con Buddy
             </Typography>
-            <Typography sx={{ fontSize: { xs: 14, md: 15 }, color: colors.grisAcero, margin: 0, lineHeight: 1.5 }}>
+            <Typography sx={{ fontSize: { xs: 14, md: 15 }, color: colors.grisAcero, margin: 0, lineHeight: 1.5, maxWidth: '58ch' }}>
               Un recorrido narrado de unos minutos. Podrás desactivar la narración cuando quieras.
             </Typography>
           </Box>
