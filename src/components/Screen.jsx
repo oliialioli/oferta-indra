@@ -113,7 +113,7 @@ const Screen = forwardRef(function Screen(
         <TypewriterHeadline text={headline} start={revealed} badges={badges} variant={headlineVariant} />
 
         {audioInvite?.show ? (
-          <AudioInviteCard onStart={audioInvite.onStart} onSkip={audioInvite.onSkip} />
+          <AudioInviteCard />
         ) : narrated ? (
           <NarratedText
             text={body}

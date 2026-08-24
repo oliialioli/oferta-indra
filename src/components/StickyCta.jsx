@@ -1,5 +1,6 @@
 import CheckIcon from '@mui/icons-material/Check';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import OfferButton from './OfferButton';
@@ -10,9 +11,110 @@ import { colors } from '../theme/theme';
 // taking you (e.g. "Siguiente: Beneficios").
 const SECTION_LABELS = ['Bienvenida', 'Tu propuesta', 'Beneficios', 'Top Employer', 'Sectores'];
 
-export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, onNext }) {
+const compactButtonSx = { padding: { xs: '10px 14px', md: '11px 18px' }, fontSize: { xs: 14, md: 15 } };
+
+export default function StickyCta({
+  onAccept,
+  activeIndex = 0,
+  screenCount = 1,
+  onNext,
+  audioDecided = true,
+  onStartAudio,
+  onSkipAudio,
+}) {
   const isLast = activeIndex >= screenCount - 1;
   const nextLabel = SECTION_LABELS[activeIndex + 1];
+  // Before the intro screen's audio choice is made, this bar temporarily
+  // IS that choice — "Aceptar oferta" has no business being reachable
+  // before anything's been reviewed, and AudioInviteCard.jsx no longer
+  // carries its own buttons (two simultaneous decisions on one screen was
+  // the actual problem). Once decided, this reverts to plain navigation
+  // for the rest of the visit — Pausar/Silenciar/Volver a escuchar live
+  // next to Buddy (AvatarNarrator.jsx) and never appear here.
+  const choosingAudio = !audioDecided;
+
+  let leftButton = null;
+  let rightButton = null;
+  if (choosingAudio) {
+    leftButton = (
+      <OfferButton variant="ghost" onClick={onSkipAudio} aria-label="Continuar sin narración de audio">
+        Ver sin audio
+      </OfferButton>
+    );
+    rightButton = (
+      <OfferButton
+        onClick={onStartAudio}
+        icon={<VolumeUpIcon />}
+        aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
+      >
+        Comenzar con Buddy
+      </OfferButton>
+    );
+  } else if (!isLast) {
+    leftButton = (
+      <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta">
+        Aceptar oferta
+      </OfferButton>
+    );
+    rightButton = (
+      <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label={`Siguiente: ${nextLabel}`}>
+        Siguiente: {nextLabel}
+      </OfferButton>
+    );
+  } else {
+    rightButton = (
+      <OfferButton onClick={onAccept} endIcon={<CheckIcon />} aria-label="Descargar y aceptar la oferta de Indra Group">
+        Descargar y aceptar oferta
+      </OfferButton>
+    );
+  }
+
+  let mobileLeft = null;
+  let mobileRight = null;
+  if (choosingAudio) {
+    mobileLeft = (
+      <OfferButton variant="ghost" onClick={onSkipAudio} aria-label="Continuar sin narración de audio" sx={compactButtonSx}>
+        Ver sin audio
+      </OfferButton>
+    );
+    mobileRight = (
+      <OfferButton
+        onClick={onStartAudio}
+        icon={<VolumeUpIcon />}
+        aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
+        sx={compactButtonSx}
+      >
+        Comenzar con Buddy
+      </OfferButton>
+    );
+  } else {
+    mobileLeft = (
+      <Typography sx={{ fontSize: 13, color: colors.grisAcero, whiteSpace: 'nowrap' }}>
+        {activeIndex + 1} de {screenCount}
+      </Typography>
+    );
+    mobileRight = isLast ? (
+      <OfferButton
+        variant="ghost"
+        onClick={onAccept}
+        endIcon={<CheckIcon />}
+        aria-label="Descargar y aceptar la oferta de Indra Group"
+        sx={{ padding: '10px 18px', fontSize: 14 }}
+      >
+        Descargar oferta
+      </OfferButton>
+    ) : (
+      <OfferButton
+        variant="ghost"
+        onClick={() => onNext?.(activeIndex)}
+        endIcon={<ArrowForwardIcon />}
+        aria-label="Siguiente sección"
+        sx={{ padding: '10px 18px', fontSize: 14 }}
+      >
+        Siguiente
+      </OfferButton>
+    );
+  }
 
   return (
     <>
@@ -41,26 +143,14 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           borderTop: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {!isLast && (
-          <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta">
-            Aceptar oferta
-          </OfferButton>
-        )}
-
-        {!isLast ? (
-          <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label={`Siguiente: ${nextLabel}`}>
-            Siguiente: {nextLabel}
-          </OfferButton>
-        ) : (
-          <OfferButton onClick={onAccept} endIcon={<CheckIcon />} aria-label="Descargar y aceptar la oferta de Indra Group">
-            Descargar y aceptar oferta
-          </OfferButton>
-        )}
+        {leftButton}
+        {rightButton}
       </Box>
 
-      {/* Mobile: unchanged layout — compact bar with section counter +
-          "Siguiente", becoming the download/accept action once the last
-          chapter is reached. */}
+      {/* Mobile: unchanged layout otherwise — compact bar with section
+          counter + "Siguiente", becoming the download/accept action once
+          the last chapter is reached; the audio choice takes over both
+          slots for as long as it hasn't been made. */}
       <Box
         sx={{
           display: { xs: 'flex', md: 'none' },
@@ -81,31 +171,8 @@ export default function StickyCta({ onAccept, activeIndex = 0, screenCount = 1, 
           borderTop: '1px solid rgba(255,255,255,0.1)',
         }}
       >
-        <Typography sx={{ fontSize: 13, color: colors.grisAcero, whiteSpace: 'nowrap' }}>
-          {activeIndex + 1} de {screenCount}
-        </Typography>
-
-        {isLast ? (
-          <OfferButton
-            variant="ghost"
-            onClick={onAccept}
-            endIcon={<CheckIcon />}
-            aria-label="Descargar y aceptar la oferta de Indra Group"
-            sx={{ padding: '10px 18px', fontSize: 14 }}
-          >
-            Descargar oferta
-          </OfferButton>
-        ) : (
-          <OfferButton
-            variant="ghost"
-            onClick={() => onNext?.(activeIndex)}
-            endIcon={<ArrowForwardIcon />}
-            aria-label="Siguiente sección"
-            sx={{ padding: '10px 18px', fontSize: 14 }}
-          >
-            Siguiente
-          </OfferButton>
-        )}
+        {mobileLeft}
+        {mobileRight}
       </Box>
     </>
   );
