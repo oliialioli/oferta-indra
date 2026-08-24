@@ -27,7 +27,7 @@ export function buildScreens(candidate) {
       const section = narratorSections[i];
       const resolved = {
         eyebrowLines: section.eyebrowLines(candidate),
-        headline: section.title(),
+        headline: section.title(candidate),
         body: section.narrationText(),
         secondaryText: section.secondaryText ? section.secondaryText() : null,
         closingText: section.closingText ? section.closingText() : null,
