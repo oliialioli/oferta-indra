@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -33,6 +34,25 @@ export default function StickyCta({
   // next to Buddy (AvatarNarrator.jsx) and never appear here.
   const choosingAudio = !audioDecided;
 
+  // Initial focus on the choice itself when it first appears — screen
+  // reader and keyboard users land somewhere meaningful rather than at the
+  // top of the page with no indication a decision is expected. Exactly one
+  // of these two refs is ever attached to a visible element at a time
+  // (desktop/mobile bars are CSS-hidden by breakpoint, not unmounted), and
+  // focusing a display:none element is a silent no-op, so trying both is
+  // safe — no visibility check needed. preventScroll avoids the jump
+  // scroll-into-view would otherwise cause on a page that's already
+  // scroll-locked (see App.jsx's useScrollLock).
+  const desktopPrimaryRef = useRef(null);
+  const mobilePrimaryRef = useRef(null);
+  useEffect(() => {
+    if (!choosingAudio) return;
+    desktopPrimaryRef.current?.focus?.({ preventScroll: true });
+    mobilePrimaryRef.current?.focus?.({ preventScroll: true });
+    // Only on the initial appearance of the choice, not every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   let leftButton = null;
   let rightButton = null;
   if (choosingAudio) {
@@ -43,6 +63,7 @@ export default function StickyCta({
     );
     rightButton = (
       <OfferButton
+        ref={desktopPrimaryRef}
         onClick={onStartAudio}
         icon={<VolumeUpIcon />}
         aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
@@ -79,6 +100,7 @@ export default function StickyCta({
     );
     mobileRight = (
       <OfferButton
+        ref={mobilePrimaryRef}
         onClick={onStartAudio}
         icon={<VolumeUpIcon />}
         aria-label="Comenzar el recorrido narrado con Buddy, activando el audio"
