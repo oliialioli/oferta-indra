@@ -3,23 +3,28 @@ import Box from '@mui/material/Box';
 import Header from './components/Header';
 import AvatarNarrator from './components/AvatarNarrator';
 import Screen from './components/Screen';
-import OfferButton from './components/OfferButton';
 import StatGrid from './components/StatGrid';
 import BenefitsGrid from './components/BenefitsGrid';
 import ReasonsList from './components/ReasonsList';
 import SectorsGrid from './components/SectorsGrid';
 import StickyCta from './components/StickyCta';
 import AcceptModal from './components/AcceptModal';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CheckIcon from '@mui/icons-material/Check';
 import { useRevealOnScroll } from './hooks/useRevealOnScroll';
-import { candidate, screens, stats, benefits, reasons, sectors } from './data/offerData';
+import { useNarrator } from './hooks/useNarrator';
+import { buildScreens, benefits, reasons, sectors, devFixtureOffer } from './data/staticOfferData';
 
 const SCREEN_COUNT = 5;
+
+const { candidate, stats } = devFixtureOffer;
+const screens = buildScreens(candidate);
 
 export default function App() {
   const { register, revealed, activeIndex, scrollToNext } = useRevealOnScroll(SCREEN_COUNT);
   const [modalOpen, setModalOpen] = useState(false);
+  // Owned here (not inside AvatarNarrator) so the active Screen's own body
+  // text can be highlighted in sync with the same audio element/state —
+  // see NarratedText.jsx.
+  const narrator = useNarrator({ activeIndex, modalOpen });
 
   const progressPct = useMemo(
     () => Math.round((activeIndex / (SCREEN_COUNT - 1)) * 100),
@@ -27,16 +32,19 @@ export default function App() {
   );
   const sectionLabel = `${activeIndex + 1} de ${SCREEN_COUNT}`;
 
+  const narratedFor = (index) => ({
+    audioRef: narrator.audioRef,
+    active: activeIndex === index && (narrator.audioPhase === 'playing' || narrator.audioPhase === 'paused'),
+    ended: activeIndex === index && (narrator.audioPhase === 'ended' || narrator.audioPhase === 'error'),
+    revealSeq: narrator.revealSeq,
+  });
+
   return (
     <>
-      <Header roleLabel={screens.intro.eyebrow} sectionLabel={sectionLabel} progressPct={progressPct} />
+      <Header roleLabel={candidate.role} sectionLabel={sectionLabel} progressPct={progressPct} />
 
       <Box sx={{ position: 'relative' }}>
-        <AvatarNarrator
-          avatarName={candidate.avatarName}
-          activeIndex={activeIndex}
-          modalOpen={modalOpen}
-        />
+        <AvatarNarrator avatarName={candidate.avatarName} narrator={narrator} />
 
         <Box
           component="main"
@@ -53,94 +61,70 @@ export default function App() {
           <Screen
             ref={register}
             revealed={revealed.has(0)}
-            eyebrow={screens.intro.eyebrow}
+            eyebrowLines={screens.intro.eyebrowLines}
+            roleHighlight={candidate.role.toUpperCase()}
             headline={screens.intro.headline}
             headlineVariant="hero"
             body={screens.intro.body}
-            tagline={screens.intro.tagline}
-          >
-            <OfferButton
-              onClick={() => scrollToNext(0)}
-              endIcon={<ArrowForwardIcon />}
-              aria-label={screens.intro.cta}
-            >
-              {screens.intro.cta}
-            </OfferButton>
-          </Screen>
+            narrated={narratedFor(0)}
+            wordTimestamps={screens.intro.wordTimestamps}
+            secondaryText={screens.intro.secondaryText}
+            closingText={screens.intro.closingText}
+          />
 
           {/* Screen 2 — Offer details */}
           <Screen
             ref={register}
             revealed={revealed.has(1)}
-            eyebrow={screens.details.eyebrow}
+            eyebrowLines={screens.details.eyebrowLines}
             headline={screens.details.headline}
             body={screens.details.body}
+            narrated={narratedFor(1)}
+            wordTimestamps={screens.details.wordTimestamps}
           >
             <StatGrid stats={stats} />
-            <OfferButton
-              onClick={() => scrollToNext(1)}
-              endIcon={<ArrowForwardIcon />}
-              aria-label={screens.details.cta}
-            >
-              {screens.details.cta}
-            </OfferButton>
           </Screen>
 
           {/* Screen 3 — Benefits */}
           <Screen
             ref={register}
             revealed={revealed.has(2)}
-            eyebrow={screens.benefits.eyebrow}
+            eyebrowLines={screens.benefits.eyebrowLines}
             headline={screens.benefits.headline}
             body={screens.benefits.body}
+            narrated={narratedFor(2)}
+            wordTimestamps={screens.benefits.wordTimestamps}
           >
             <BenefitsGrid benefits={benefits} />
-            <OfferButton
-              onClick={() => scrollToNext(2)}
-              endIcon={<ArrowForwardIcon />}
-              aria-label={screens.benefits.cta}
-            >
-              {screens.benefits.cta}
-            </OfferButton>
           </Screen>
 
           {/* Screen 4 — Top Employer */}
           <Screen
             ref={register}
             revealed={revealed.has(3)}
-            eyebrow={screens.topEmployer.eyebrow}
+            eyebrowLines={screens.topEmployer.eyebrowLines}
             headline={screens.topEmployer.headline}
             body={screens.topEmployer.body}
+            narrated={narratedFor(3)}
+            wordTimestamps={screens.topEmployer.wordTimestamps}
             badges={screens.topEmployer.badges}
-            tagline={screens.topEmployer.tagline}
-            taglinePosition="after-children"
+            closingText={screens.topEmployer.closingText}
+            closingPosition="after-children"
           >
             <ReasonsList reasons={reasons} />
-            <OfferButton
-              onClick={() => scrollToNext(3)}
-              endIcon={<ArrowForwardIcon />}
-              aria-label={screens.topEmployer.cta}
-            >
-              {screens.topEmployer.cta}
-            </OfferButton>
           </Screen>
 
           {/* Screen 5 — Sectors + accept */}
           <Screen
             ref={register}
             revealed={revealed.has(4)}
-            eyebrow={screens.sectors.eyebrow}
+            eyebrowLines={screens.sectors.eyebrowLines}
             headline={screens.sectors.headline}
             body={screens.sectors.body}
+            narrated={narratedFor(4)}
+            wordTimestamps={screens.sectors.wordTimestamps}
           >
             <SectorsGrid sectors={sectors} />
-            <OfferButton
-              onClick={() => setModalOpen(true)}
-              endIcon={<CheckIcon />}
-              aria-label={screens.sectors.cta}
-            >
-              {screens.sectors.cta}
-            </OfferButton>
           </Screen>
         </Box>
       </Box>
@@ -152,11 +136,7 @@ export default function App() {
         onNext={scrollToNext}
       />
 
-      <AcceptModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        candidateName={candidate.name}
-      />
+      <AcceptModal open={modalOpen} onClose={() => setModalOpen(false)} candidateName={candidate.name} />
     </>
   );
 }
