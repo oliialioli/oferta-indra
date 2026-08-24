@@ -87,13 +87,13 @@ export default function StickyCta({
         Comenzar con Buddy
       </OfferButton>
     );
-  } else {
+  } else if (isLast) {
     mobileLeft = (
       <Typography sx={{ fontSize: 13, color: colors.grisAcero, whiteSpace: 'nowrap' }}>
         {activeIndex + 1} de {screenCount}
       </Typography>
     );
-    mobileRight = isLast ? (
+    mobileRight = (
       <OfferButton
         variant="ghost"
         onClick={onAccept}
@@ -103,14 +103,19 @@ export default function StickyCta({
       >
         Descargar oferta
       </OfferButton>
-    ) : (
-      <OfferButton
-        variant="ghost"
-        onClick={() => onNext?.(activeIndex)}
-        endIcon={<ArrowForwardIcon />}
-        aria-label="Siguiente sección"
-        sx={{ padding: '10px 18px', fontSize: 14 }}
-      >
+    );
+  } else {
+    // Same secondary/primary pairing as desktop — "Aceptar oferta" reachable
+    // for anyone who wants to skip ahead, "Siguiente" carrying the visual
+    // weight since it's the expected next step. The section counter still
+    // shows in the header on mobile, so dropping it here isn't a loss.
+    mobileLeft = (
+      <OfferButton variant="ghost" onClick={onAccept} aria-label="Saltar directamente a aceptar la oferta" sx={compactButtonSx}>
+        Aceptar oferta
+      </OfferButton>
+    );
+    mobileRight = (
+      <OfferButton onClick={() => onNext?.(activeIndex)} endIcon={<ArrowForwardIcon />} aria-label="Siguiente sección" sx={compactButtonSx}>
         Siguiente
       </OfferButton>
     );

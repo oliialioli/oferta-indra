@@ -14,7 +14,12 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { NARRATOR_VIDEOS, LOOPING_STATES } from '../data/narratorVideos';
 import avatarPoster from '../assets/images/buddy-avatar-poster.png';
 
-const CROSSFADE_MS = 220;
+// Longer than a typical UI crossfade on purpose — the character clips are
+// independently rendered, so consecutive states (e.g. greeting's last
+// frame -> idle's first frame) rarely land on matching poses. A slower
+// dissolve reads as an intentional transition; a snappy one reads as a
+// jump cut. 220ms was too quick for that specific case.
+const CROSSFADE_MS = 450;
 const LAYER_REF_KEYS = ['A', 'B'];
 const CYAN = '#22D3EE';
 // Sampled directly from the character clips' own background — a hair off
