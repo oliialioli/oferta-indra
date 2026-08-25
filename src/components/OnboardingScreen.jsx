@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import OfferButton from './OfferButton';
 import OnboardingBuddy from './OnboardingBuddy';
@@ -11,6 +12,9 @@ import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import indraLogo from '../assets/images/indra-logo.svg';
 
 const EXIT_MS = 220;
+// Same cyan used for the speaking indicator next to Buddy elsewhere
+// (AvatarNarrator.jsx) — ties this audio-related icon to the same accent.
+const CYAN = '#22D3EE';
 
 /**
  * A genuinely separate, naturally-scrollable page shown before the tour
@@ -103,7 +107,7 @@ export default function OnboardingScreen({ candidate, expiryNotice, narrator }) 
           <OnboardingBuddy narrator={narrator} avatarName={candidate.avatarName} />
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: '20px', md: '28px' }, maxWidth: 775, paddingLeft: { md: 'clamp(8px, 1.2vw, 24px)' } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: '20px', md: '28px' }, maxWidth: { xs: 775, md: 620 }, paddingLeft: { md: 'clamp(8px, 1.2vw, 24px)' } }}>
           <Box>
             <Typography sx={{ fontSize: { xs: 13, md: 15 }, color: colors.grisAcero, margin: '0 0 6px' }}>
               TU PROPUESTA · {candidate.role.toUpperCase()}
@@ -125,9 +129,12 @@ export default function OnboardingScreen({ candidate, expiryNotice, narrator }) 
               borderRadius: '10px',
             }}
           >
-            <Typography sx={{ fontSize: { xs: 17, md: 19 }, color: colors.blanco, fontWeight: 500, margin: 0 }}>
-              Conoce tu propuesta con Buddy
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <VolumeUpIcon sx={{ fontSize: { xs: 18, md: 20 }, color: CYAN, flex: 'none' }} />
+              <Typography sx={{ fontSize: { xs: 17, md: 19 }, color: colors.blanco, fontWeight: 500, margin: 0 }}>
+                Conoce tu propuesta con Buddy
+              </Typography>
+            </Box>
             <Typography sx={{ fontSize: { xs: 14, md: 15 }, color: colors.grisAcero, margin: 0, lineHeight: 1.5, maxWidth: '58ch' }}>
               Un recorrido narrado de unos minutos. Podrás desactivar la narración cuando quieras.
             </Typography>
@@ -141,9 +148,12 @@ export default function OnboardingScreen({ candidate, expiryNotice, narrator }) 
           </Box>
 
           {expiryNotice && (
-            <Typography sx={{ fontSize: { xs: 12, md: 13 }, color: colors.grisAcero, opacity: 0.85, margin: 0 }}>
-              {expiryNotice}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+              <AccessTimeIcon sx={{ fontSize: 14, color: colors.grisAcero, opacity: 0.85, marginTop: '1px', flex: 'none' }} />
+              <Typography sx={{ fontSize: { xs: 12, md: 13 }, color: colors.grisAcero, opacity: 0.85, margin: 0 }}>
+                {expiryNotice}
+              </Typography>
+            </Box>
           )}
         </Box>
       </Box>
