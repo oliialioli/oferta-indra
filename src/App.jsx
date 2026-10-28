@@ -11,6 +11,7 @@ import SectorsGrid from './components/SectorsGrid';
 import StickyCta from './components/StickyCta';
 import AcceptModal from './components/AcceptModal';
 import OnboardingScreen from './components/OnboardingScreen';
+import WelcomeScreen from './components/WelcomeScreen';
 import { useRevealOnScroll } from './hooks/useRevealOnScroll';
 import { useNarrator } from './hooks/useNarrator';
 import { useOfferData } from './data/useOfferData';
@@ -18,6 +19,16 @@ import { benefits, reasons, sectors } from './data/staticOfferData';
 import { colors } from './theme/theme';
 
 const SCREEN_COUNT = 5;
+
+// Which welcome screen to show before the tour: `?welcome=ring` (default,
+// Figma frame 38 — particle ring that the visitor flies through on exit),
+// `?welcome=burst` (Figma frame 39 — the dispersed, zoomed-in field) or
+// `?welcome=classic` (the previous Buddy-card onboarding).
+function readWelcomeVariant() {
+  const v = new URLSearchParams(window.location.search).get('welcome');
+  return v === 'burst' || v === 'classic' ? v : 'ring';
+}
+const welcomeVariant = readWelcomeVariant();
 
 export default function App({ slug }) {
   const { candidate, screens, stats, offerExpiresAt, loading, error } = useOfferData(slug);
@@ -91,7 +102,10 @@ export default function App({ slug }) {
   // directly) or because it was made earlier this session and useNarrator
   // recovered it from sessionStorage on mount.
   if (!narrator.audioDecided) {
-    return <OnboardingScreen candidate={candidate} expiryNotice={expiryNotice} narrator={narrator} />;
+    if (welcomeVariant === 'classic') {
+      return <OnboardingScreen candidate={candidate} expiryNotice={expiryNotice} narrator={narrator} />;
+    }
+    return <WelcomeScreen candidate={candidate} expiryNotice={expiryNotice} narrator={narrator} variant={welcomeVariant} />;
   }
 
   return (
